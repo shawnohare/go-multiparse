@@ -2,7 +2,6 @@ package multiparse
 
 import (
 	"errors"
-	"log"
 	"math/big"
 	"regexp"
 	"strconv"
@@ -100,7 +99,7 @@ func (p MoneyParser) parse(s string) (string, error) {
 		parseErr error = errors.New(ParseMonetaryStringError)
 	)
 
-	log.Println("Initial input:", s)
+	// log.Println("Initial input:", s)
 
 	// Ensure the input has at least one digit.
 	re = regexp.MustCompile(".*[0-9].*")
@@ -110,7 +109,7 @@ func (p MoneyParser) parse(s string) (string, error) {
 
 	// Remove the first currency symbols that appear.
 	s = p.removeCurrencySymbol(s)
-	log.Println("Removed currency symbols:", s)
+	// log.Println("Removed currency symbols:", s)
 
 	// Now determine whether the string's initial character is a + or -.
 	// If so, strip it away and record the sign.
@@ -143,12 +142,12 @@ func (p MoneyParser) parse(s string) (string, error) {
 	// Create the main validating regex.
 	reStr = "^\\d+" + "(" + p.digitReStr + "\\d{3})*" + p.decimalReStr + "?\\d*$"
 	re = regexp.MustCompile(reStr)
-	log.Println("main validation re:", re.String())
+	// log.Println("main validation re:", re.String())
 	if !re.MatchString(s) {
 		// log.Println("Didn't pass main validating regexp:", s)
 		return "", parseErr
 	}
-	log.Println("Input passed main regex test:", s)
+	// log.Println("Input passed main regex test:", s)
 
 	// We can now assume that the string is valid except for extra delimiters.
 	var parsed string
@@ -175,7 +174,7 @@ func (p MoneyParser) parse(s string) (string, error) {
 		}
 	}
 
-	log.Println("Parsed string:", parsed)
+	// log.Println("Parsed string:", parsed)
 
 	if err != nil {
 		return "", err
