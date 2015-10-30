@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-// A ParseMonetaryStringError is a generic indication that a string
-// could not be parsed as a monetary value.
-const ParseMonetaryStringError = "Cannot parse string as a monetary value."
-
 // A Money instance is a simple representation of a monetary value.  It
 // has access to the original pre-parsed string as well as a few numeric
 // types.
@@ -78,7 +74,7 @@ func MakeMoneyParser(currencySym, digitSep, decimalSep string) *MoneyParser {
 
 	currencyMap := map[string]string{
 		"":  "^[^0-9-\\+\\.]+",
-		"$": "[\\$]",
+		"$": "^[\\$]",
 	}
 
 	// Input -> regex string
@@ -100,58 +96,92 @@ func MakeMoneyParser(currencySym, digitSep, decimalSep string) *MoneyParser {
 	return p
 }
 
-func (p MoneyParser) removeCurrencySymbol(s string) string {
-	var cleaned string
-	loc := p.currencyRegex.FindStringIndex(s)
-	if len(loc) == 2 {
-		cleaned = s[loc[1]:]
-	} else {
-		cleaned = s
-	}
-	return cleaned
-}
-
 // Parse an input string and return the *Money result as an interface.
 func (p MoneyParser) Parse(s string) (interface{}, error) {
-	return p.ParseMoney(s)
+	return p.parse(s)
 }
 
 // ParseMoney parses the input string and return the result
 // as a *Money instance.
 func (p MoneyParser) ParseMoney(s string) (*Money, error) {
-	parsed, err := p.parseString(s)
-	if err != nil {
-		return nil, err
-	}
-
-	m := &Money{
-		original: s,
-		parsed:   parsed,
-	}
-	return m, nil
-
+	return p.parse(s)
 }
 
-func (p MoneyParser) parseString(s string) (string, error) {
+func (p MoneyParser) removeCurrencySymbol(s string) string {
+	loc := p.currencyRegex.FindStringIndex(s)
+	if len(loc) == 2 {
+		return s[loc[1]:]
+	}
+	return s
+}
+
+func (p MoneyParser) removeDigitSeparators(s string) (string, error) {
+	if p.digitReStr == p.decimalReStr {
+		return "", errors.New(ParseMoneySeparatorError)
+	}
+
+	cleaned := p.digitRegex.ReplaceAllString(s, "")
+	return cleaned, nil
+}
+
+// replace the last occurence of a decimal separator with "."
+func (p MoneyParser) replaceDecimalSeparator(s string) (string, error) {
+	if p.digitReStr == p.decimalReStr {
+		return "", errors.New(ParseMoneySeparatorError)
+	}
+
+	// Do not need to do anything if the decimal separator is already "."
+	if p.decimalReStr == "[\\.]" {
+		return s, nil
+	}
+
+	locs := p.decimalRegex.FindAllStringIndex(s, -1)
+	if len(locs) == 0 {
+		return s, nil
+	}
+
+	loc := locs[len(locs)-1]
+	cleaned := s[:loc[0]] + "." + s[loc[1]:]
+	return cleaned, nil
+}
+
+func (p MoneyParser) sanitize(s string) (string, error) {
+
+	s = p.removeCurrencySymbol(s)
+	tmp, err1 := p.removeDigitSeparators(s)
+	if err1 == nil {
+		s = tmp
+	}
+	tmp, err2 := p.replaceDecimalSeparator(s)
+	if err2 == nil {
+		s = tmp
+	}
+
+	var err error
+	if err1 != nil || err2 != nil {
+		err = errors.New(err1.Error() + err2.Error())
+	}
+	return s, err
+}
+
+func (p MoneyParser) parse(s string) (*Money, error) {
 	var (
 		sign     string
 		reStr    string
 		re       *regexp.Regexp
 		err      error
 		parseErr = errors.New(ParseMonetaryStringError)
+		original = s
 	)
-
-	// log.Println("Initial input:", s)
 
 	// Ensure the input has at least one digit.
 	re = regexp.MustCompile(".*[0-9].*")
 	if !re.MatchString(s) {
-		return "", parseErr
+		return nil, parseErr
 	}
 
 	// Remove the first currency symbols that appear.
 	s = p.removeCurrencySymbol(s)
-	// log.Println("Removed currency symbols:", s)
 
 	// Now determine whether the string's initial character is a + or -.
 	// If so, strip it away and record the sign.
@@ -163,7 +193,6 @@ func (p MoneyParser) parseString(s string) (string, error) {
 		}
 		s = s[1:]
 	}
-	// log.Println("Determined the sign to be:", sign, "for ", s)
 
 	// A valid string now either begins with digits or a decimal separator.
 	// If it begns with the later, prepend a 0.
@@ -173,8 +202,7 @@ func (p MoneyParser) parseString(s string) (string, error) {
 		s = "0" + s
 	}
 
-	// A valid string could terminate with a decimal separator.  If so,
-	// add some zeros.
+	// Append decimal zeros if necessary.  E.g., 123. -> 123.00
 	reStr = "^.*" + p.decimalReStr + "$"
 	re = regexp.MustCompile(reStr)
 	if re.MatchString(s) {
@@ -184,48 +212,41 @@ func (p MoneyParser) parseString(s string) (string, error) {
 	// Create the main validating regex.
 	reStr = "^\\d+" + "(" + p.digitReStr + "\\d{3})*" + p.decimalReStr + "?\\d*$"
 	re = regexp.MustCompile(reStr)
-	// log.Println("main validation re:", re.String())
 	if !re.MatchString(s) {
-		// log.Println("Didn't pass main validating regexp:", s)
-		return "", parseErr
+		return nil, parseErr
 	}
-	// log.Println("Input passed main regex test:", s)
 
 	// We can now assume that the string is valid except for extra delimiters.
+	// Before attempting to parse the string further, we (possibly) perform
+	// some basic sanitization.
 	var parsed string
-	if p.DigitSeparator != "" && p.DigitSeparator != "" {
-		// Remove extraneous digit separators.
-		s = strings.Replace(s, p.DigitSeparator, "", -1)
-		// Replace any custom decimal separator with one that will parse later.
-		s = strings.Replace(s, p.DecimalSeparator, ".", 1)
-		// The input string should now be properly sanitized and ready for conversion.
-		parsed = s
+	tmp, err := p.sanitize(s)
+	if err == nil {
+		parsed = tmp
 	} else {
 		re = regexp.MustCompile(p.digitReStr + "|" + p.decimalReStr)
-		// FIXME
 		locs := re.FindAllStringSubmatchIndex(s, -1)
 		switch len(locs) {
-		case 0:
-			// The number is an integer.  No additional parsing needed.
+		case 0: // The number is an integer.  No additional parsing needed.
 			parsed = s
 			err = nil
-		case 1:
+		case 1: // Need to deal with 1,234 vs 123,456 vs 12.345, etc.
 			parsed, err = p.parseOneUnknownSeparator(s, locs[0][0])
-		default:
+		default: // Try to find the last separator and determine its type.
 			parsed, err = p.parseManyUnknownSeparators(s, locs)
 		}
-	}
 
-	// log.Println("Parsed string:", parsed)
+	}
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	// Add back the sign.
-	parsed = sign + parsed
-
-	return parsed, nil
+	m := &Money{
+		original: original,
+		parsed:   sign + parsed,
+	}
+	return m, nil
 
 }
 

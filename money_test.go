@@ -43,7 +43,63 @@ func TestMoneyParserParse(t *testing.T) {
 	}
 }
 
-func TestMoneyParserParseStandard(t *testing.T) {
+func TestMakeMoneyParserCustom(t *testing.T) {
+	p := NewStandardMoneyParser()
+	c := MakeMoneyParser("^[\\$]", "[,]", "[\\.]")
+	d := MakeMoneyParser("$", ",", ".")
+	assert.Equal(t, "^[\\$]", p.currencyReStr)
+	assert.Equal(t, "^[\\$]", c.currencyReStr)
+	assert.Equal(t, "^[\\$]", d.currencyReStr)
+	assert.Equal(t, "[,]", p.digitReStr)
+	assert.Equal(t, "[,]", c.digitReStr)
+	assert.Equal(t, "[,]", d.digitReStr)
+	assert.Equal(t, "[\\.]", p.decimalReStr)
+	assert.Equal(t, "[\\.]", c.decimalReStr)
+	assert.Equal(t, "[\\.]", d.decimalReStr)
+}
+
+func TestStandardMoneyParserSanitize(t *testing.T) {
+	tests := []struct {
+		in  string
+		out string
+	}{
+		{"$123,456", "123456"},
+		{"123,456", "123456"},
+	}
+
+	s := NewStandardMoneyParser()
+	for _, tt := range tests {
+		sanitized, err := s.sanitize(tt.in)
+		assert.Equal(t, tt.out, sanitized)
+		if tt.out != "" {
+			assert.NoError(t, err)
+		}
+	}
+}
+
+func TestMoneyParserSanitize(t *testing.T) {
+	tests := []struct {
+		in  string
+		out string
+	}{
+		{"$123,456", "123.456"},
+		{"USD123,456", "123.456"},
+		{"CURRENCY 123,456", "123.456"},
+		{"123.456", "123456"},
+	}
+
+	s := MakeMoneyParser("", ".", ",")
+	for _, tt := range tests {
+		sanitized, err := s.sanitize(tt.in)
+		assert.Equal(t, tt.out, sanitized)
+		if tt.out != "" {
+			assert.NoError(t, err)
+		}
+	}
+
+}
+
+func TestStandardMoneyParserParse(t *testing.T) {
 	passes := []string{
 		"$123,234.00",
 		"123,234.00",
@@ -65,13 +121,10 @@ func TestMoneyParserParseStandard(t *testing.T) {
 	}
 
 	parser := MakeMoneyParser("$", ",", ".")
-	parser2 := MakeMoneyParser("$", "[,]", ".")
 
 	for _, tt := range passes {
 		// t.Log(tt)
 		_, err := parser.Parse(tt)
-		assert.NoError(t, err)
-		_, err = parser2.Parse(tt)
 		assert.NoError(t, err)
 	}
 	for _, tt := range fails {
