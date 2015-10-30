@@ -8,24 +8,59 @@ import (
 	"strings"
 )
 
+// A ParseMonetaryStringError is a generic indication that a string
+// could not be parsed as a monetary value.
 const ParseMonetaryStringError = "Cannot parse string as a monetary value."
 
+// A Money instance is a simple representation of a monetary value.  It
+// has access to the original pre-parsed string as well as a few numeric
+// types.
 type Money struct {
 	original string
 	parsed   string
 }
 
+// A MoneyParser ingests a string and determines whether it is a monetary
+// value by using its configuration dictionary.  This dictionary consists
+// of a currency symbol, a digit separator and a decimal separator.
 type MoneyParser struct {
 	CurrencySymbol   string
 	DigitSeparator   string
 	DecimalSeparator string
 	// Unexported fields.
-	digitReStr   string
-	decimalReStr string
-	digitRegex   *regexp.Regexp
-	decimalRegex *regexp.Regexp
+	digitReStr    string
+	decimalReStr  string
+	currencyReStr string
+	digitRegex    *regexp.Regexp
+	decimalRegex  *regexp.Regexp
+	currencyRegex *regexp.Regexp
 }
 
+// NewMoneyParser with the most general dictionary.  The dictionary
+// values are all empty strings, and so this parser is agnostic to
+// whether "," indicates a digit or decimal separator.  Moreover, it
+// considers anything in the compliment of { +, -, 0, 1, ..., 9, \s }
+// to be a currency symbol.
+//
+// This parser interprets "123.456" and "123,456" as integer values.
+func NewMoneyParser() *MoneyParser {
+	return MakeMoneyParser("", "", "")
+}
+
+// NewStandardMoneyParser is configured with a currency symbol "$",
+// digit separator ",", and decimal separator ".".
+func NewStandardMoneyParser() *MoneyParser {
+	return MakeMoneyParser("$", ",", ".")
+}
+
+// MakeMoneyParser with the dictionary defined by the inititialization
+// parameters.
+//
+// Valid inputs for the currency symbol are: "", "$", or any
+// regular expression.
+//
+// Valid inputs for the separators are: "", ".", ",", or any
+// regular expression.
 func MakeMoneyParser(currencySym, digitSep, decimalSep string) *MoneyParser {
 	p := &MoneyParser{
 		CurrencySymbol:   currencySym,
@@ -33,50 +68,58 @@ func MakeMoneyParser(currencySym, digitSep, decimalSep string) *MoneyParser {
 		DecimalSeparator: decimalSep,
 	}
 
-	// Regex (string) delimiter creator.
-	f := func(t string) string {
-		var r string
-		switch t {
-		case "":
-			r = "[\\.,]"
-		case ".":
-			r = "[\\.]"
-		case ",":
-			r = "[,]"
-		}
-		return r
+	// Define the regular expression maps to convert string inputs into valid
+	// regular expressions.
+	sepMap := map[string]string{
+		"":  "[\\.,]",
+		".": "[\\.]",
+		",": "[,]",
 	}
 
-	p.digitReStr = f(p.DigitSeparator)
-	p.decimalReStr = f(p.DecimalSeparator)
+	currencyMap := map[string]string{
+		"":  "^[^0-9-\\+\\.]+",
+		"$": "[\\$]",
+	}
+
+	// Input -> regex string
+	f := func(t string, m map[string]string) string {
+		if restr, prs := m[t]; prs {
+			return restr
+		}
+
+		return t
+	}
+
+	p.digitReStr = f(p.DigitSeparator, sepMap)
+	p.decimalReStr = f(p.DecimalSeparator, sepMap)
+	p.currencyReStr = f(p.CurrencySymbol, currencyMap)
 	p.digitRegex = regexp.MustCompile(p.digitReStr)
 	p.decimalRegex = regexp.MustCompile(p.decimalReStr)
+	p.currencyRegex = regexp.MustCompile(p.currencyReStr)
 
 	return p
 }
 
-func MakeStandardMoneyParser() *MoneyParser {
-	return MakeMoneyParser("$", ",", ".")
-}
-
 func (p MoneyParser) removeCurrencySymbol(s string) string {
 	var cleaned string
-	if p.CurrencySymbol != "" {
-		cleaned = strings.Replace(s, p.CurrencySymbol, "", 1)
+	loc := p.currencyRegex.FindStringIndex(s)
+	if len(loc) == 2 {
+		cleaned = s[loc[1]:]
 	} else {
-		re := regexp.MustCompile("^[^0-9-\\+\\.]+")
-		loc := re.FindStringIndex(s)
-		if len(loc) == 2 {
-			cleaned = s[loc[1]:]
-		} else {
-			cleaned = s
-		}
+		cleaned = s
 	}
 	return cleaned
 }
 
-func (p MoneyParser) Parse(s string) (*Money, error) {
-	parsed, err := p.parse(s)
+// Parse an input string and return the *Money result as an interface.
+func (p MoneyParser) Parse(s string) (interface{}, error) {
+	return p.ParseMoney(s)
+}
+
+// ParseMoney parses the input string and return the result
+// as a *Money instance.
+func (p MoneyParser) ParseMoney(s string) (*Money, error) {
+	parsed, err := p.parseString(s)
 	if err != nil {
 		return nil, err
 	}
@@ -89,14 +132,13 @@ func (p MoneyParser) Parse(s string) (*Money, error) {
 
 }
 
-// parse a string and determine whether it passes some basic validation tests.
-func (p MoneyParser) parse(s string) (string, error) {
+func (p MoneyParser) parseString(s string) (string, error) {
 	var (
 		sign     string
 		reStr    string
 		re       *regexp.Regexp
 		err      error
-		parseErr error = errors.New(ParseMonetaryStringError)
+		parseErr = errors.New(ParseMonetaryStringError)
 	)
 
 	// log.Println("Initial input:", s)
@@ -265,13 +307,11 @@ func (m Money) BigFloat() (*big.Float, error) {
 	return bf, err
 }
 
-// Parse a string representing a monetary value and covert it to a
-// *Money instance.  The separator parameters denote any optional formatting
-// and decimal separators (e.g., "," and "." in "123,456.05", resp.).
-// If the separators are "" then the function tries to automatically detect
-// formatting and decimal separators.
+// ParseMonetaryString parses an input string representing a monetary value
+// and returns the *Money result.  This convenience function utilizes the
+// generic MoneyParser returned by NewMoneyParser.
 func ParseMonetaryString(s string) (*Money, error) {
 	// Make a generic money parser with no opinion
 	parser := MakeMoneyParser("", "", "")
-	return parser.Parse(s)
+	return parser.ParseMoney(s)
 }

@@ -17,8 +17,8 @@ func TestMoneyParsedString(t *testing.T) {
 }
 
 func TestMoneyBigFloat(t *testing.T) {
-	p := MakeStandardMoneyParser()
-	m, _ := p.Parse("123")
+	p := NewStandardMoneyParser()
+	m, _ := p.ParseMoney("123")
 	_, err := m.BigFloat()
 	assert.NoError(t, err)
 }
@@ -65,14 +65,17 @@ func TestMoneyParserParseStandard(t *testing.T) {
 	}
 
 	parser := MakeMoneyParser("$", ",", ".")
+	parser2 := MakeMoneyParser("$", "[,]", ".")
 
 	for _, tt := range passes {
-		t.Log(tt)
+		// t.Log(tt)
 		_, err := parser.Parse(tt)
+		assert.NoError(t, err)
+		_, err = parser2.Parse(tt)
 		assert.NoError(t, err)
 	}
 	for _, tt := range fails {
-		t.Log(tt)
+		// t.Log(tt)
 		_, err := parser.Parse(tt)
 		assert.Error(t, err)
 	}
@@ -141,13 +144,19 @@ func TestParseMonetaryString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		parser := NewMoneyParser()
 		m, err := ParseMonetaryString(tt.in)
+		m2, err2 := parser.ParseMoney(tt.in)
 		assert.NoError(t, err)
+		assert.NoError(t, err2)
 		assert.NotNil(t, m)
+		assert.NotNil(t, m2)
 		// t.Log(tt.in)
 		if err == nil {
 			ac, _ := m.Float64()
+			ac2, _ := m2.Float64()
 			assert.Equal(t, tt.out, ac)
+			assert.Equal(t, tt.out, ac2)
 		}
 	}
 
