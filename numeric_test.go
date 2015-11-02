@@ -214,3 +214,42 @@ func TestNumericMethods(t *testing.T) {
 	}
 
 }
+
+func TestParseNumeric(t *testing.T) {
+	tests := []string{
+		"123",
+		"123.5",
+		"$123.4",
+		"abc",
+	}
+
+	p := NewNumericParser()
+	for _, tt := range tests {
+		x, err := ParseNumeric(tt)
+		y, err2 := p.parse(tt)
+		assert.Equal(t, err, err2)
+		if err == nil {
+			assert.Equal(t, *y, *x)
+		}
+	}
+}
+
+func TestNumericType(t *testing.T) {
+	tests := []struct {
+		in  string
+		out string
+	}{
+		{"123", "int"},
+		{"123.5", "float"},
+		{"$123.5", "money"},
+	}
+
+	p := NewNumericParser()
+	for _, tt := range tests {
+		x, _ := p.parse(tt.in)
+		assert.Equal(t, tt.out, x.Type())
+	}
+
+	x := new(Numeric)
+	assert.Equal(t, "None", x.Type())
+}

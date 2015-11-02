@@ -219,3 +219,13 @@ func TestParseMonetaryString(t *testing.T) {
 		assert.Error(t, err)
 	}
 }
+
+func TestMoneyType(t *testing.T) {
+	m := new(Money)
+	assert.NotEqual(t, "", m.Type())
+}
+
+func TestMoneyValue(t *testing.T) {
+	m := new(Money)
+	assert.Equal(t, *m, *(m.Value().(*Money)))
+}

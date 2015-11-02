@@ -106,6 +106,8 @@ func (x Numeric) Int() (int, bool) {
 	return y, x.isInt
 }
 
+// Float reports whether the Numeric instance can be a float
+// and returns its value.
 func (x Numeric) Float() (float64, bool) {
 	var y float64
 	if x.isFloat {
@@ -126,6 +128,6 @@ func (x Numeric) Money() (*Money, bool) {
 }
 
 func ParseNumeric(s string) (*Numeric, error) {
-	// TODO
-	return nil, errors.New("bad")
+	p := NewNumericParser()
+	return p.parse(s)
 }
