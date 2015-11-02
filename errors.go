@@ -5,4 +5,5 @@ const (
 	ParseMoneyError          = ParseMonetaryStringError
 	ParseMoneySeparatorError = "Cannot distinguish digit and decimal separators."
 	ParseNumericError        = "Cannot parse the string as a numeric type."
+	ParseTimeError           = "Cannot parse the string as a time."
 )
