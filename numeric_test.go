@@ -14,40 +14,40 @@ func TestNumericParserParse(t *testing.T) {
 		{
 			"123",
 			&Numeric{
-				parsed:    "123",
-				isInt:     true,
-				isFloat64: true,
-				isMoney:   true,
+				parsed:  "123",
+				isInt:   true,
+				isFloat: true,
+				isMoney: true,
 			},
 		},
 		// Float
 		{
 			"123.4",
 			&Numeric{
-				parsed:    "123.4",
-				isInt:     false,
-				isFloat64: true,
-				isMoney:   true,
+				parsed:  "123.4",
+				isInt:   false,
+				isFloat: true,
+				isMoney: true,
 			},
 		},
 		// Only money
 		{
 			"$123.45",
 			&Numeric{
-				parsed:    "123.45",
-				isInt:     false,
-				isFloat64: false,
-				isMoney:   true,
+				parsed:  "123.45",
+				isInt:   false,
+				isFloat: false,
+				isMoney: true,
 			},
 		},
 		// Another money
 		{
 			"€123,45",
 			&Numeric{
-				parsed:    "123.45",
-				isInt:     false,
-				isFloat64: false,
-				isMoney:   true,
+				parsed:  "123.45",
+				isInt:   false,
+				isFloat: false,
+				isMoney: true,
 			},
 		},
 		// Fail case
@@ -83,40 +83,40 @@ func TestStandardNumericParserParse(t *testing.T) {
 		{
 			"123",
 			&Numeric{
-				parsed:    "123",
-				isInt:     true,
-				isFloat64: true,
-				isMoney:   true,
+				parsed:  "123",
+				isInt:   true,
+				isFloat: true,
+				isMoney: true,
 			},
 		},
 		// Float
 		{
 			"123.4",
 			&Numeric{
-				parsed:    "123.4",
-				isInt:     false,
-				isFloat64: true,
-				isMoney:   true,
+				parsed:  "123.4",
+				isInt:   false,
+				isFloat: true,
+				isMoney: true,
 			},
 		},
 		// Only money
 		{
 			"$123.45",
 			&Numeric{
-				parsed:    "123.45",
-				isInt:     false,
-				isFloat64: false,
-				isMoney:   true,
+				parsed:  "123.45",
+				isInt:   false,
+				isFloat: false,
+				isMoney: true,
 			},
 		},
 		// Another money
 		{
 			"$123,456",
 			&Numeric{
-				parsed:    "123456",
-				isInt:     false,
-				isFloat64: false,
-				isMoney:   true,
+				parsed:  "123456",
+				isInt:   false,
+				isFloat: false,
+				isMoney: true,
 			},
 		},
 		// Fail case
@@ -145,18 +145,18 @@ func TestStandardNumericParserParse(t *testing.T) {
 
 func TestNumericMethods(t *testing.T) {
 	tests := []struct {
-		in         *Numeric
-		outInt     int
-		outFloat64 float64
-		outMoney   *Money
+		in       *Numeric
+		outInt   int
+		outFloat float64
+		outMoney *Money
 	}{
 		// Int
 		{
 			&Numeric{
-				parsed:    "123",
-				isInt:     true,
-				isFloat64: true,
-				isMoney:   true,
+				parsed:  "123",
+				isInt:   true,
+				isFloat: true,
+				isMoney: true,
 			},
 			123,
 			123.0,
@@ -168,10 +168,10 @@ func TestNumericMethods(t *testing.T) {
 		// Float
 		{
 			&Numeric{
-				parsed:    "123.4",
-				isInt:     false,
-				isFloat64: true,
-				isMoney:   true,
+				parsed:  "123.4",
+				isInt:   false,
+				isFloat: true,
+				isMoney: true,
 			},
 			0,
 			123.4,
@@ -183,10 +183,10 @@ func TestNumericMethods(t *testing.T) {
 		// Only money
 		{
 			&Numeric{
-				parsed:    "123.45",
-				isInt:     false,
-				isFloat64: false,
-				isMoney:   true,
+				parsed:  "123.45",
+				isInt:   false,
+				isFloat: false,
+				isMoney: true,
 			},
 			0,
 			0.0,
@@ -204,9 +204,9 @@ func TestNumericMethods(t *testing.T) {
 		assert.Equal(t, tt.in.isInt, in)
 		assert.Equal(t, tt.outInt, x)
 
-		y, in := tt.in.Float64()
-		assert.Equal(t, tt.in.isFloat64, in)
-		assert.Equal(t, tt.outFloat64, y)
+		y, in := tt.in.Float()
+		assert.Equal(t, tt.in.isFloat, in)
+		assert.Equal(t, tt.outFloat, y)
 
 		z, in := tt.in.Money()
 		assert.Equal(t, tt.in.isMoney, in)

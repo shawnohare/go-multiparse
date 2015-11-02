@@ -32,6 +32,10 @@ type MoneyParser struct {
 	currencyRegex *regexp.Regexp
 }
 
+func (m Money) Type() string { return "money" }
+
+// func (m Money) Value() interface{} { return &m }
+
 // NewMoneyParser with the most general dictionary.  The dictionary
 // values are all empty strings, and so this parser is agnostic to
 // whether "," indicates a digit or decimal separator.  Moreover, it

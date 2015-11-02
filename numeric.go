@@ -8,14 +8,26 @@ import (
 // Numeric instances are containers for the various valid numerical types
 // that a string may be parsed into.
 type Numeric struct {
-	parsed    string
-	isInt     bool
-	isFloat64 bool
-	isMoney   bool
+	parsed  string
+	isInt   bool
+	isFloat bool
+	isMoney bool
 }
 
 type NumericParser struct {
 	money Parser
+}
+
+func (x Numeric) Type() string {
+	if x.isInt {
+		return "int"
+	} else if x.isFloat {
+		return "float"
+	} else if x.isMoney {
+		return "money"
+	} else {
+		return "None"
+	}
 }
 
 func NewNumericParser() *NumericParser {
@@ -49,10 +61,10 @@ func (p NumericParser) parse(s string) (*Numeric, error) {
 	_, err = strconv.Atoi(s)
 	if err == nil {
 		n = &Numeric{
-			parsed:    s,
-			isInt:     true,
-			isFloat64: true,
-			isMoney:   true,
+			parsed:  s,
+			isInt:   true,
+			isFloat: true,
+			isMoney: true,
 		}
 		return n, nil
 	}
@@ -60,9 +72,9 @@ func (p NumericParser) parse(s string) (*Numeric, error) {
 	_, err = strconv.ParseFloat(s, 64)
 	if err == nil {
 		n = &Numeric{
-			parsed:    s,
-			isFloat64: true,
-			isMoney:   true,
+			parsed:  s,
+			isFloat: true,
+			isMoney: true,
 		}
 		return n, nil
 	}
@@ -94,12 +106,12 @@ func (x Numeric) Int() (int, bool) {
 	return y, x.isInt
 }
 
-func (x Numeric) Float64() (float64, bool) {
+func (x Numeric) Float() (float64, bool) {
 	var y float64
-	if x.isFloat64 {
+	if x.isFloat {
 		y, _ = strconv.ParseFloat(x.parsed, 64)
 	}
-	return y, x.isFloat64
+	return y, x.isFloat
 }
 
 func (x Numeric) Money() (*Money, bool) {
