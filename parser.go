@@ -2,19 +2,30 @@ package multiparse
 
 import "errors"
 
+// MultiParse is the general interface all multiparse parsers implement.
 type MultiParse interface {
 	Parse(string) (interface{}, error)
 }
 
+// Parser instances determine whether a string is
+// a numeric or time representation.  Each Parser instance implements
+// the MultiParse interface.
 type Parser struct {
 	numeric MultiParse
 	time    MultiParse
 }
 
+// MakeGeneralParse constructs a general purpose top-level Parser instance.
+// It is initialized with the  general numeric and time parsers provided
+// by MakeGeneralNumericParser and MakeGeneralTimeParser.
 func MakeGeneralParser() *Parser {
 	return MakeParser(MakeGeneralNumericParser(), MakeGeneralTimeParser())
 }
 
+// MakeParser is a general purpose parser that uses the passed in
+// MultiParse interfaces to determine whether a string is a numeric or
+// time representation.  The provided parsers should return *Numeric and
+// *Time instances, respectively.
 func MakeParser(numericParser MultiParse, timeParser MultiParse) *Parser {
 	return &Parser{
 		numeric: numericParser,
@@ -23,11 +34,14 @@ func MakeParser(numericParser MultiParse, timeParser MultiParse) *Parser {
 }
 
 // Parse a string to determine if it is a numeric or monetary value.
-// If so, return the value as a *Parsed instance.
+// This method is defined primarily so that the Parser struct satifies
+// the MultiParse interface.
 func (p Parser) Parse(s string) (interface{}, error) {
 	return p.parse(s)
 }
 
+// ParseType determines whether a numeric or time representation
+// according to the initialzed parsers.
 func (p Parser) ParseType(s string) (*Parsed, error) {
 	return p.parse(s)
 }
@@ -77,6 +91,10 @@ func (p Parser) parse(s string) (*Parsed, error) {
 	return parsed, nil
 }
 
+// Parse a string to determine whether it represents a numeric or time value.
+// This is a convenience function that is equivalent to calling the
+// ParseType method on a general purpose parser instance returned by
+// MakeGeneralParser.
 func Parse(s string) (*Parsed, error) {
 	p := MakeGeneralParser()
 	return p.parse(s)
