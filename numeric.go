@@ -12,10 +12,11 @@ type Numeric struct {
 	isInt   bool
 	isFloat bool
 	isMoney bool
+	money   *Money
 }
 
 type NumericParser struct {
-	money Parser
+	money MultiParse
 }
 
 func (x Numeric) Type() string {
@@ -30,17 +31,17 @@ func (x Numeric) Type() string {
 	}
 }
 
-func NewNumericParser() *NumericParser {
-	mp := NewMoneyParser()
+func MakeGeneralNumericParser() *NumericParser {
+	mp := MakeGeneralMoneyParser()
 	return MakeNumericParser(mp)
 }
 
-func NewStandardNumericParser() *NumericParser {
-	mp := NewStandardMoneyParser()
+func MakeStandardNumericParser() *NumericParser {
+	mp := MakeStandardMoneyParser()
 	return MakeNumericParser(mp)
 }
 
-func MakeNumericParser(moneyParser Parser) *NumericParser {
+func MakeNumericParser(moneyParser MultiParse) *NumericParser {
 	return &NumericParser{
 		money: moneyParser,
 	}
@@ -85,6 +86,7 @@ func (p NumericParser) parse(s string) (*Numeric, error) {
 		n = &Numeric{
 			parsed:  m.ParsedString(),
 			isMoney: true,
+			money:   m,
 		}
 		return n, nil
 	}
@@ -118,16 +120,16 @@ func (x Numeric) Float() (float64, bool) {
 
 func (x Numeric) Money() (*Money, bool) {
 	var y *Money
-	if x.isMoney {
-		// In this case, x.parsed is a standard string and can be
-		// converted to a Money instance via the standard parser.
-		p := NewStandardMoneyParser()
+	if x.isMoney && x.money != nil && x.money.original != "" {
+		y = x.money
+	} else {
+		p := MakeStandardMoneyParser()
 		y, _ = p.parse(x.parsed)
 	}
 	return y, x.isMoney
 }
 
 func ParseNumeric(s string) (*Numeric, error) {
-	p := NewNumericParser()
+	p := MakeGeneralNumericParser()
 	return p.parse(s)
 }

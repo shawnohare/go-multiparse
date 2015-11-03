@@ -38,6 +38,7 @@ func TestNumericParserParse(t *testing.T) {
 				isInt:   false,
 				isFloat: false,
 				isMoney: true,
+				money:   &Money{"$123.45", "123.45"},
 			},
 		},
 		// Another money
@@ -48,6 +49,7 @@ func TestNumericParserParse(t *testing.T) {
 				isInt:   false,
 				isFloat: false,
 				isMoney: true,
+				money:   &Money{"€123,45", "123.45"},
 			},
 		},
 		// Fail case
@@ -57,7 +59,7 @@ func TestNumericParserParse(t *testing.T) {
 		},
 	}
 
-	p := NewNumericParser()
+	p := MakeGeneralNumericParser()
 	for _, tt := range tests {
 		nI, err := p.Parse(tt.in)
 		m, _ := p.ParseNumeric(tt.in)
@@ -107,6 +109,7 @@ func TestStandardNumericParserParse(t *testing.T) {
 				isInt:   false,
 				isFloat: false,
 				isMoney: true,
+				money:   &Money{"$123.45", "123.45"},
 			},
 		},
 		// Another money
@@ -117,6 +120,7 @@ func TestStandardNumericParserParse(t *testing.T) {
 				isInt:   false,
 				isFloat: false,
 				isMoney: true,
+				money:   &Money{"$123,456", "123456"},
 			},
 		},
 		// Fail case
@@ -126,13 +130,22 @@ func TestStandardNumericParserParse(t *testing.T) {
 		},
 	}
 
-	p := NewStandardNumericParser()
+	p := MakeStandardNumericParser()
 	for _, tt := range tests {
 		nI, err := p.Parse(tt.in)
 		m, _ := p.ParseNumeric(tt.in)
 		if tt.out != nil {
 			n := nI.(*Numeric)
-			assert.Equal(t, *m, *n)
+			assert.Equal(t, m.isInt, n.isInt)
+			assert.Equal(t, m.isFloat, n.isFloat)
+			assert.Equal(t, m.isMoney, n.isMoney)
+			assert.Equal(t, tt.out.isInt, m.isInt)
+			assert.Equal(t, tt.out.isFloat, m.isFloat)
+			assert.Equal(t, tt.out.isMoney, m.isMoney)
+			if m.money != nil {
+				assert.Equal(t, *m.money, *n.money)
+				assert.Equal(t, *tt.out.money, *m.money)
+			}
 			assert.NoError(t, err)
 			assert.Equal(t, *tt.out, *n)
 		} else {
@@ -223,7 +236,7 @@ func TestParseNumeric(t *testing.T) {
 		"abc",
 	}
 
-	p := NewNumericParser()
+	p := MakeGeneralNumericParser()
 	for _, tt := range tests {
 		x, err := ParseNumeric(tt)
 		y, err2 := p.parse(tt)
@@ -244,7 +257,7 @@ func TestNumericType(t *testing.T) {
 		{"$123.5", "money"},
 	}
 
-	p := NewNumericParser()
+	p := MakeGeneralNumericParser()
 	for _, tt := range tests {
 		x, _ := p.parse(tt.in)
 		assert.Equal(t, tt.out, x.Type())
