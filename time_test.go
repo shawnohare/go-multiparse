@@ -1,8 +1,10 @@
 package multiparse
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseTime(t *testing.T) {
@@ -66,4 +68,12 @@ func TestTimeType(t *testing.T) {
 func TestTimeValue(t *testing.T) {
 	tt := new(Time)
 	assert.Equal(t, *tt, *(tt.Value().(*Time)))
+}
+
+func TestTimeParserParseType(t *testing.T) {
+	p := MakeGeneralTimeParser()
+	expected, _ := time.Parse("2006-01-02", "2015-01-02")
+	actual, err := p.ParseTime("2015-01-02")
+	assert.NoError(t, err)
+	assert.Equal(t, expected, actual.Time())
 }

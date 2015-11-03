@@ -45,25 +45,32 @@ var commonDateLayouts = []string{
 	"Jan. 2 2006",
 }
 
-// TODO write general regex that recognizes
-
-type Time struct {
-	parsed string
-	layout string
-	time   time.Time
+type TimeParser struct {
+	timeLayouts []string
+	dateLayouts []string
 }
 
-func (t Time) Type() string       { return "time" }
-func (t Time) Value() interface{} { return &t }
-func (t Time) String() string     { return t.parsed }
-func (t Time) Time() time.Time    { return t.time }
-func (t Time) Layout() string     { return t.layout }
+func MakeGeneralTimeParser() *TimeParser {
+	return MakeTimeParser(commonTimeLayouts, commonDateLayouts)
+}
 
-// ParseTime determines whether the input string parses for any of
-// a number of common layouts.
-func ParseTime(s string) (*Time, error) {
+func MakeTimeParser(timeLayouts []string, dateLayouts []string) *TimeParser {
+	return &TimeParser{
+		timeLayouts: timeLayouts,
+		dateLayouts: dateLayouts,
+	}
+}
+
+func (p TimeParser) Parse(s string) (interface{}, error) {
+	return p.parse(s)
+}
+func (p TimeParser) ParseTime(s string) (*Time, error) {
+	return p.parse(s)
+}
+
+func (p TimeParser) parse(s string) (*Time, error) {
 	// Determine whether s has a valid layout that includes time.
-	for _, layout := range commonTimeLayouts {
+	for _, layout := range p.timeLayouts {
 		if pt, err := time.Parse(layout, s); err == nil {
 			t := &Time{
 				parsed: s,
@@ -82,7 +89,7 @@ func ParseTime(s string) (*Time, error) {
 		return nil, errors.New(ParseTimeError)
 	} else {
 		t := new(Time)
-		for _, layout := range commonDateLayouts {
+		for _, layout := range p.dateLayouts {
 			if pt, err := time.Parse(layout, d); err == nil {
 				t = &Time{
 					parsed: d,
@@ -94,4 +101,25 @@ func ParseTime(s string) (*Time, error) {
 		}
 		return t, nil
 	}
+}
+
+// TODO write general regex that recognizes
+
+type Time struct {
+	parsed string
+	layout string
+	time   time.Time
+}
+
+func (t Time) Type() string       { return "time" }
+func (t Time) Value() interface{} { return &t }
+func (t Time) String() string     { return t.parsed }
+func (t Time) Time() time.Time    { return t.time }
+func (t Time) Layout() string     { return t.layout }
+
+// ParseTime determines whether the input string parses for any of
+// a number of common layouts.
+func ParseTime(s string) (*Time, error) {
+	p := MakeGeneralTimeParser()
+	return p.parse(s)
 }
