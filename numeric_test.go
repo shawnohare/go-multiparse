@@ -1,9 +1,27 @@
 package multiparse
 
 import (
-	"github.com/stretchr/testify/assert"
+	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
+
+func TestNumericValue(t *testing.T) {
+	n := &Numeric{
+		isInt: true,
+	}
+	v := n.Value().(*Numeric)
+	assert.Equal(t, *n, *v)
+}
+
+func TestNumericParserParseType(t *testing.T) {
+	p := MakeGeneralNumericParser()
+	s := "123"
+	n, _ := p.ParseType(s)
+	m, _ := p.ParseNumeric(s)
+	assert.True(t, reflect.DeepEqual(n, m))
+}
 
 func TestNumericParserParse(t *testing.T) {
 	tests := []struct {
@@ -18,6 +36,18 @@ func TestNumericParserParse(t *testing.T) {
 				isInt:   true,
 				isFloat: true,
 				isMoney: true,
+				money:   &Money{"123", "123"},
+			},
+		},
+		// Int
+		{
+			"123,456",
+			&Numeric{
+				parsed:  "123456",
+				isInt:   true,
+				isFloat: true,
+				isMoney: true,
+				money:   &Money{"123,456", "123456"},
 			},
 		},
 		// Float
@@ -28,6 +58,18 @@ func TestNumericParserParse(t *testing.T) {
 				isInt:   false,
 				isFloat: true,
 				isMoney: true,
+				money:   &Money{"123.4", "123.4"},
+			},
+		},
+		// Float
+		{
+			"12,345.67",
+			&Numeric{
+				parsed:  "12345.67",
+				isInt:   false,
+				isFloat: true,
+				isMoney: true,
+				money:   &Money{"12,345.67", "12345.67"},
 			},
 		},
 		// Only money
@@ -65,9 +107,10 @@ func TestNumericParserParse(t *testing.T) {
 		m, _ := p.ParseNumeric(tt.in)
 		if tt.out != nil {
 			n := nI.(*Numeric)
-			assert.Equal(t, *m, *n)
+			assert.True(t, reflect.DeepEqual(m, n))
 			assert.NoError(t, err)
-			assert.Equal(t, *tt.out, *n)
+			assert.Equal(t, *(tt.out.money), *(n.money))
+			assert.True(t, reflect.DeepEqual(tt.out, n))
 		} else {
 			assert.Error(t, err)
 			assert.Nil(t, nI)
@@ -89,6 +132,7 @@ func TestStandardNumericParserParse(t *testing.T) {
 				isInt:   true,
 				isFloat: true,
 				isMoney: true,
+				money:   &Money{original: "123", parsed: "123"},
 			},
 		},
 		// Float
@@ -99,6 +143,7 @@ func TestStandardNumericParserParse(t *testing.T) {
 				isInt:   false,
 				isFloat: true,
 				isMoney: true,
+				money:   &Money{original: "123.4", parsed: "123.4"},
 			},
 		},
 		// Only money
@@ -130,7 +175,7 @@ func TestStandardNumericParserParse(t *testing.T) {
 		},
 	}
 
-	p := MakeStandardNumericParser()
+	p := MakeUSDNumericParser()
 	for _, tt := range tests {
 		nI, err := p.Parse(tt.in)
 		m, _ := p.ParseNumeric(tt.in)

@@ -1,3 +1,5 @@
+// Package multiparse provides tools to perform basic type detection and
+// parsing on strings.
 package multiparse
 
 import "errors"
@@ -7,19 +9,28 @@ type MultiParse interface {
 	Parse(string) (interface{}, error)
 }
 
-// Parser instances determine whether a string is
-// a numeric or time representation.  Each Parser instance implements
-// the MultiParse interface.
+// Parser instances determine whether a string is a numeric or
+// time representation.  Each Parser instance implements
+// the MultiParse interface.  Moreover, it is a wrapper for two more
+// MultiParse interfaces: one for parsing numeric strings and the other
+// for parsing datetime strings.
 type Parser struct {
 	numeric MultiParse
 	time    MultiParse
 }
 
-// MakeGeneralParse constructs a general purpose top-level Parser instance.
+// MakeGeneralParser constructs a general purpose top-level Parser instance.
 // It is initialized with the  general numeric and time parsers provided
 // by MakeGeneralNumericParser and MakeGeneralTimeParser.
 func MakeGeneralParser() *Parser {
 	return MakeParser(MakeGeneralNumericParser(), MakeGeneralTimeParser())
+}
+
+// MakeUSDParser constructs a top-level Parser instance that can more
+// accurately detect USD monetary strings. For example, it will
+// parse "$123,456" as a monetary integer.
+func MakeUSDParser() *Parser {
+	return MakeParser(MakeUSDNumericParser(), MakeGeneralTimeParser())
 }
 
 // MakeParser is a general purpose parser that uses the passed in
