@@ -111,6 +111,132 @@ func TestBadParsers(t *testing.T) {
 	_, err = parser.ParseType("123")
 }
 
+func TestParserParseType(t *testing.T) {
+	var err error
+	p := MakeGeneralParser()
+
+	// Pass
+	passes := []string{"123"}
+	for _, tt := range passes {
+		_, err = p.ParseType(tt)
+		assert.NoError(t, err)
+		_, err = ParseType(tt)
+		assert.NoError(t, err)
+	}
+
+	// Fail
+	failures := []string{
+		"abc",
+	}
+
+	for _, f := range failures {
+		_, err = p.ParseType(f)
+		assert.Error(t, err)
+		_, err = ParseType(f)
+		assert.Error(t, err)
+	}
+
+}
+
+func TestParserParseInt(t *testing.T) {
+	var err error
+	p := MakeGeneralParser()
+
+	// Pass
+	_, err = p.ParseInt("123")
+	assert.NoError(t, err)
+	_, err = ParseInt("123")
+	assert.NoError(t, err)
+
+	// Fail
+	failures := []string{
+		"abc",
+		"123.4",
+		"$123.4",
+	}
+
+	for _, f := range failures {
+		_, err = p.ParseInt(f)
+		assert.Error(t, err)
+		_, err = ParseInt(f)
+		assert.Error(t, err)
+	}
+}
+
+func TestParserParseFloat(t *testing.T) {
+	var err error
+	p := MakeGeneralParser()
+
+	// Pass
+	_, err = p.ParseFloat("123")
+	assert.NoError(t, err)
+	_, err = ParseFloat("123")
+	assert.NoError(t, err)
+
+	// Fail
+	failures := []string{
+		"abc",
+		"$123.4",
+	}
+
+	for _, f := range failures {
+		_, err = p.ParseFloat(f)
+		assert.Error(t, err)
+		_, err = ParseFloat(f)
+		assert.Error(t, err)
+	}
+}
+
+func TestParserParseMoney(t *testing.T) {
+	var err error
+	p := MakeGeneralParser()
+
+	// Pass
+	_, err = p.ParseMoney("123")
+	assert.NoError(t, err)
+	_, err = ParseMoney("123")
+	assert.NoError(t, err)
+
+	// Fail
+	failures := []string{
+		"abc",
+		"$1..23.4",
+		"2006/01/02",
+	}
+
+	for _, f := range failures {
+		_, err = p.ParseMoney(f)
+		assert.Error(t, err)
+		_, err = ParseMoney(f)
+		assert.Error(t, err)
+	}
+}
+
+func TestParserParseTime(t *testing.T) {
+	var err error
+	p := MakeGeneralParser()
+
+	// Pass
+	_, err = p.ParseTime("2015-06-15")
+	assert.NoError(t, err)
+	_, err = ParseTime("2015-06-15")
+	assert.NoError(t, err)
+
+	// Fail
+	failures := []string{
+		"123",
+		"abc",
+		"$123.4",
+	}
+
+	for _, f := range failures {
+		_, err = p.ParseTime(f)
+		assert.Error(t, err)
+		_, err = ParseTime(f)
+		assert.Error(t, err)
+	}
+}
+
 func ExampleParseType() {
 	var p *Parsed
 

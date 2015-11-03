@@ -119,6 +119,17 @@ func TestNumericParserParse(t *testing.T) {
 
 }
 
+func TestParseNumericParseMoney(t *testing.T) {
+	var err error
+	good := "$123"
+	bad := "abc"
+	p := MakeGeneralNumericParser()
+	_, err = p.ParseMoney(good)
+	assert.NoError(t, err)
+	_, err = p.ParseMoney(bad)
+	assert.Error(t, err)
+}
+
 func TestStandardNumericParserParse(t *testing.T) {
 	tests := []struct {
 		in  string
@@ -215,6 +226,10 @@ func TestNumericMethods(t *testing.T) {
 				isInt:   true,
 				isFloat: true,
 				isMoney: true,
+				money: &Money{
+					original: "123",
+					parsed:   "123",
+				},
 			},
 			123,
 			123.0,
@@ -230,6 +245,10 @@ func TestNumericMethods(t *testing.T) {
 				isInt:   false,
 				isFloat: true,
 				isMoney: true,
+				money: &Money{
+					original: "123.4",
+					parsed:   "123.4",
+				},
 			},
 			0,
 			123.4,
@@ -245,6 +264,10 @@ func TestNumericMethods(t *testing.T) {
 				isInt:   false,
 				isFloat: false,
 				isMoney: true,
+				money: &Money{
+					original: "123.45",
+					parsed:   "123.45",
+				},
 			},
 			0,
 			0.0,

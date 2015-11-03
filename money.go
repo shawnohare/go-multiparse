@@ -48,12 +48,3 @@ func (m Money) BigFloat() (*big.Float, error) {
 	}
 	return bf, err
 }
-
-// ParseMoney parses an input string representing a monetary value
-// and returns the *Money result.  This convenience function utilizes the
-// generic MoneyParser returned by NewMoneyParser.
-func ParseMoney(s string) (*Money, error) {
-	// Make a generic money parser with no opinion
-	parser := MakeNumericParser("", "", "")
-	return parser.ParseMoney(s)
-}

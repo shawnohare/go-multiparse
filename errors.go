@@ -1,7 +1,9 @@
 package multiparse
 
 const (
-	ParseMonetaryStringError = "Cannot parse string as a monetary type."
+	ParseIntError            = "Cannot parse string as an integer."
+	ParseFloatError          = "Cannot parse string as a float."
+	ParseMonetaryStringError = "Cannot parse string as a monetary value."
 	ParseMoneyError          = ParseMonetaryStringError
 	ParseMoneySeparatorError = "Cannot distinguish digit and decimal separators."
 	ParseNumericError        = "Cannot parse string as a numeric type."

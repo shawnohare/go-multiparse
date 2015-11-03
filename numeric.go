@@ -398,14 +398,12 @@ func (x Numeric) Float() (float64, bool) {
 }
 
 func (x Numeric) Money() (*Money, bool) {
-	var y *Money
-	if x.isMoney && x.money != nil && x.money.original != "" {
+	y := new(Money)
+
+	if x.isMoney && x.money != nil {
 		y = x.money
-	} else {
-		p := MakeUSDNumericParser()
-		z, _ := p.parse(x.parsed)
-		y = z.money
 	}
+
 	return y, x.isMoney
 }
 

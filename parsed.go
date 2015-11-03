@@ -17,7 +17,7 @@ type Parsed struct {
 
 func NewParsed() *Parsed {
 	return &Parsed{
-		numeric: new(Numeric),
+		numeric: &Numeric{money: new(Money)},
 		time:    new(Time),
 	}
 }

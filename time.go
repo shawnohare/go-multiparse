@@ -137,12 +137,3 @@ func (p TimeParser) parse(s string) (*Time, error) {
 	}
 	return t, nil
 }
-
-// ParseTime determines whether the input string parses for any of
-// a number of common layouts. Calling this function is equivalent to
-// constructing a general time parser with MakeGeneralTimeParser
-// and invoking its ParseTime method.
-func ParseTime(s string) (*Time, error) {
-	p := MakeGeneralTimeParser()
-	return p.parse(s)
-}

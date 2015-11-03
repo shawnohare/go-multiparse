@@ -1,13 +1,6 @@
-// Package multiparse provides tools to perform basic type detection and
-// parsing on strings.
 package multiparse
 
 import "errors"
-
-// MultiParse is the general interface all multiparse parsers implement.
-type MultiParse interface {
-	Parse(string) (interface{}, error)
-}
 
 // Parser instances determine whether a string is a numeric or
 // time representation.  Each Parser instance implements
@@ -57,6 +50,66 @@ func (p Parser) ParseType(s string) (*Parsed, error) {
 	return p.parse(s)
 }
 
+// ParseInt reports whether the string parses to an integer according
+// to the parser rules.
+func (p Parser) ParseInt(s string) (int, error) {
+	parsed, err := p.parse(s)
+	if err != nil {
+		return 0, err
+	}
+
+	if f, ok := parsed.Int(); ok {
+		return f, nil
+	}
+
+	return 0, errors.New(ParseIntError)
+}
+
+// ParseFloat reports whether the string parses to a float according
+// to the parser rules.
+func (p Parser) ParseFloat(s string) (float64, error) {
+	parsed, err := p.parse(s)
+	if err != nil {
+		return 0.0, err
+	}
+
+	if f, ok := parsed.Float(); ok {
+		return f, nil
+	}
+
+	return 0.0, errors.New(ParseFloatError)
+}
+
+// ParseMoneyreports whether the string parses to a moneytary value
+// according to the parser rules.
+func (p Parser) ParseMoney(s string) (*Money, error) {
+	parsed, err := p.parse(s)
+	if err != nil {
+		return nil, err
+	}
+
+	if f, ok := parsed.Money(); ok {
+		return f, nil
+	}
+
+	return nil, errors.New(ParseMoneyError)
+}
+
+// ParseMoneyreports whether the string parses to a datetime
+// according to the parser rules.
+func (p Parser) ParseTime(s string) (*Time, error) {
+	parsed, err := p.parse(s)
+	if err != nil {
+		return nil, err
+	}
+
+	if f, ok := parsed.Time(); ok {
+		return f, nil
+	}
+
+	return nil, errors.New(ParseTimeError)
+}
+
 // parse a string to determine if it is a valid numeric or time value
 // Error when either the underlying parsers return values that cannot
 // convert to the appropriate types or when the string does not
@@ -100,13 +153,4 @@ func (p Parser) parse(s string) (*Parsed, error) {
 	}
 
 	return parsed, nil
-}
-
-// Parse a string to determine whether it represents a numeric or time value.
-// This is a convenience function that is equivalent to calling the
-// ParseType method on a general purpose parser instance returned by
-// MakeGeneralParser.
-func Parse(s string) (*Parsed, error) {
-	p := MakeGeneralParser()
-	return p.parse(s)
 }
