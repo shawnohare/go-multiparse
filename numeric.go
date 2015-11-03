@@ -26,9 +26,8 @@ func (x Numeric) Type() string {
 		return "float"
 	} else if x.isMoney {
 		return "money"
-	} else {
-		return "None"
 	}
+	return "None"
 }
 
 func MakeGeneralNumericParser() *NumericParser {

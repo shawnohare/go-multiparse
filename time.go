@@ -87,20 +87,20 @@ func (p TimeParser) parse(s string) (*Time, error) {
 
 	if d == "" {
 		return nil, errors.New(ParseTimeError)
-	} else {
-		t := new(Time)
-		for _, layout := range p.dateLayouts {
-			if pt, err := time.Parse(layout, d); err == nil {
-				t = &Time{
-					parsed: d,
-					layout: layout,
-					time:   pt,
-				}
-				break
-			}
-		}
-		return t, nil
 	}
+
+	t := new(Time)
+	for _, layout := range p.dateLayouts {
+		if pt, err := time.Parse(layout, d); err == nil {
+			t = &Time{
+				parsed: d,
+				layout: layout,
+				time:   pt,
+			}
+			break
+		}
+	}
+	return t, nil
 }
 
 // TODO write general regex that recognizes
