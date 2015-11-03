@@ -17,7 +17,7 @@ func TestMoneyParsedString(t *testing.T) {
 }
 
 func TestMoneyBigFloat(t *testing.T) {
-	p := NewStandardMoneyParser()
+	p := MakeStandardMoneyParser()
 	m, _ := p.ParseMoney("123")
 	_, err := m.BigFloat()
 	assert.NoError(t, err)
@@ -44,7 +44,7 @@ func TestMoneyParserParse(t *testing.T) {
 }
 
 func TestMakeMoneyParserCustom(t *testing.T) {
-	p := NewStandardMoneyParser()
+	p := MakeStandardMoneyParser()
 	c := MakeMoneyParser("^[\\$]", "[,]", "[\\.]")
 	d := MakeMoneyParser("$", ",", ".")
 	assert.Equal(t, "^[\\$]", p.currencyReStr)
@@ -67,7 +67,7 @@ func TestStandardMoneyParserSanitize(t *testing.T) {
 		{"123,456", "123456"},
 	}
 
-	s := NewStandardMoneyParser()
+	s := MakeStandardMoneyParser()
 	for _, tt := range tests {
 		sanitized, err := s.sanitize(tt.in)
 		assert.Equal(t, tt.out, sanitized)
@@ -134,7 +134,7 @@ func TestStandardMoneyParserParse(t *testing.T) {
 	}
 }
 
-func TestParseMonetaryString(t *testing.T) {
+func TestParseMoney(t *testing.T) {
 	m1 := 123456789.12
 	m2 := 123456789.0
 	m3 := 123456.0
@@ -197,8 +197,8 @@ func TestParseMonetaryString(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		parser := NewMoneyParser()
-		m, err := ParseMonetaryString(tt.in)
+		parser := MakeGeneralMoneyParser()
+		m, err := ParseMoney(tt.in)
 		m2, err2 := parser.ParseMoney(tt.in)
 		assert.NoError(t, err)
 		assert.NoError(t, err2)
@@ -214,7 +214,7 @@ func TestParseMonetaryString(t *testing.T) {
 	}
 
 	for _, tt := range errorTests {
-		m, err := ParseMonetaryString(tt)
+		m, err := ParseMoney(tt)
 		assert.Nil(t, m)
 		assert.Error(t, err)
 	}

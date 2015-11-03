@@ -42,13 +42,13 @@ func (m Money) Value() interface{} { return &m }
 // to be a currency symbol.
 //
 // This parser interprets "123.456" and "123,456" as integer values.
-func NewMoneyParser() *MoneyParser {
+func MakeGeneralMoneyParser() *MoneyParser {
 	return MakeMoneyParser("", "", "")
 }
 
 // NewStandardMoneyParser is configured with a currency symbol "$",
 // digit separator ",", and decimal separator ".".
-func NewStandardMoneyParser() *MoneyParser {
+func MakeStandardMoneyParser() *MoneyParser {
 	return MakeMoneyParser("$", ",", ".")
 }
 
@@ -331,10 +331,10 @@ func (m Money) BigFloat() (*big.Float, error) {
 	return bf, err
 }
 
-// ParseMonetaryString parses an input string representing a monetary value
+// ParseMoney parses an input string representing a monetary value
 // and returns the *Money result.  This convenience function utilizes the
 // generic MoneyParser returned by NewMoneyParser.
-func ParseMonetaryString(s string) (*Money, error) {
+func ParseMoney(s string) (*Money, error) {
 	// Make a generic money parser with no opinion
 	parser := MakeMoneyParser("", "", "")
 	return parser.ParseMoney(s)
