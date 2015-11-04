@@ -14,9 +14,6 @@ type Money struct {
 	parsed   string
 }
 
-func (m Money) Type() string       { return "money" }
-func (m Money) Value() interface{} { return &m }
-
 // String representation of the monetary value with any original currency
 // symbols and formatting included.
 func (m Money) String() string {

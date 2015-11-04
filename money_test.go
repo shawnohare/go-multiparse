@@ -224,16 +224,6 @@ func TestParseMoney(t *testing.T) {
 	}
 }
 
-func TestMoneyType(t *testing.T) {
-	m := new(Money)
-	assert.NotEqual(t, "", m.Type())
-}
-
-func TestMoneyValue(t *testing.T) {
-	m := new(Money)
-	assert.Equal(t, *m, *(m.Value().(*Money)))
-}
-
 func TestBadMoney(t *testing.T) {
 	var err error
 	m := new(Money)

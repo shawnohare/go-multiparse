@@ -7,14 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNumericValue(t *testing.T) {
-	n := &Numeric{
-		isInt: true,
-	}
-	v := n.Value().(*Numeric)
-	assert.Equal(t, *n, *v)
-}
-
 func TestNumericParserParseType(t *testing.T) {
 	p := MakeGeneralNumericParser()
 	s := "123"

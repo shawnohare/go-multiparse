@@ -17,6 +17,7 @@ type Numeric struct {
 	money   *Money
 }
 
+// Type is the most specific type the instance represents.
 func (x Numeric) Type() string {
 	if x.isInt {
 		return "int"
@@ -26,10 +27,6 @@ func (x Numeric) Type() string {
 		return "money"
 	}
 	return "None"
-}
-
-func (x Numeric) Value() interface{} {
-	return &x
 }
 
 // A NumericParser ingests a string and determines whether it is
@@ -49,7 +46,7 @@ type NumericParser struct {
 	currencyRegex *regexp.Regexp
 }
 
-// NewGeneralNumericParser with the most general dictionary.  The dictionary
+// MakeGeneralNumericParser with the most general dictionary.  The dictionary
 // values are all empty strings, and so this parser is agnostic to
 // whether "," indicates a digit or decimal separator.  Moreover, it
 // considers anything in the compliment of { +, -, 0, 1, ..., 9, \s }
@@ -60,7 +57,7 @@ func MakeGeneralNumericParser() *NumericParser {
 	return MakeNumericParser("", "", "")
 }
 
-// NewUSDNumericParser is configured with a currency symbol "$",
+// MakeUSDNumericParser is configured with a currency symbol "$",
 // digit separator ",", and decimal separator ".".
 // It properly detects that "123.456" is a real number, but not an integer.
 func MakeUSDNumericParser() *NumericParser {
@@ -114,18 +111,22 @@ func MakeNumericParser(currencySym, digitSep, decimalSep string) *NumericParser 
 	return p
 }
 
+// Parse a string to determine if it represents a numeric type.
 func (p NumericParser) Parse(s string) (interface{}, error) {
 	return p.parse(s)
 }
 
+// ParseType is a synonym for ParseNumeric
 func (p NumericParser) ParseType(s string) (*Numeric, error) {
 	return p.parse(s)
 }
 
+// ParseNumeric a string to determine if it represents a numeric type.
 func (p NumericParser) ParseNumeric(s string) (*Numeric, error) {
 	return p.parse(s)
 }
 
+// ParseMoney parses a string to determine if it is a monetary value.
 func (p NumericParser) ParseMoney(s string) (*Money, error) {
 	n, err := p.parse(s)
 	if err != nil {
@@ -397,6 +398,8 @@ func (x Numeric) Float() (float64, bool) {
 	return y, x.isFloat
 }
 
+// Money reports whether the Numeric instance represents a monetary
+// value and returns this value.
 func (x Numeric) Money() (*Money, bool) {
 	y := new(Money)
 
@@ -420,9 +423,4 @@ func (x Numeric) IsFloat() bool {
 // IsMoney reports if the instance can represent a monetary value.
 func (x Numeric) IsMoney() bool {
 	return x.isMoney
-}
-
-func ParseNumeric(s string) (*Numeric, error) {
-	p := MakeGeneralNumericParser()
-	return p.parse(s)
 }

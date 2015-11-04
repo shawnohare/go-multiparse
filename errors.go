@@ -1,5 +1,6 @@
 package multiparse
 
+// Standard parsing errors.
 const (
 	ParseIntError            = "Cannot parse string as an integer."
 	ParseFloatError          = "Cannot parse string as a float."

@@ -1,11 +1,5 @@
 package multiparse
 
-// Type reporting for types with multiple subtypes.
-type Type interface {
-	Type() string
-	Value() interface{}
-}
-
 // Parsed is the most general type description of a string.
 type Parsed struct {
 	original  string
@@ -15,6 +9,7 @@ type Parsed struct {
 	time      *Time
 }
 
+// NewParsed returns a Parsed instance with zero values.
 func NewParsed() *Parsed {
 	return &Parsed{
 		numeric: &Numeric{money: new(Money)},
@@ -26,6 +21,8 @@ func (p Parsed) String() string {
 	return p.original
 }
 
+// Numeric reports whether the parsed string is a Numeric type and
+// returns its value.
 func (p Parsed) Numeric() (*Numeric, bool) {
 	if !p.isNumeric {
 		return nil, false
@@ -77,7 +74,7 @@ func (p Parsed) IsFloat() bool {
 	return p.numeric.IsFloat()
 }
 
-// Ismoney reports if the parsed string represents a monetary value.
+// IsMoney reports if the parsed string represents a monetary value.
 func (p Parsed) IsMoney() bool {
 	return p.numeric.IsMoney()
 }
@@ -92,7 +89,7 @@ func (p Parsed) Float() (float64, bool) {
 	return p.numeric.Float()
 }
 
-// Float reports if the parsed string is a monetary value and returns the
+// Money reports if the parsed string is a monetary value and returns the
 // corresponding Money instance.
 func (p Parsed) Money() (*Money, bool) {
 	return p.numeric.Money()

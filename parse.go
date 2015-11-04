@@ -37,7 +37,7 @@ func ParseFloat(s string) (float64, error) {
 	return p.ParseFloat(s)
 }
 
-// ParseMoneyreports whether the string parses to a moneytary value
+// ParseMoney reports whether the string parses to a moneytary value
 // according to the parser rules.
 func ParseMoney(s string) (*Money, error) {
 	p := MakeGeneralParser()
@@ -51,4 +51,10 @@ func ParseMoney(s string) (*Money, error) {
 func ParseTime(s string) (*Time, error) {
 	p := MakeGeneralParser()
 	return p.ParseTime(s)
+}
+
+// ParseNumeric determines whether the string represents a numeric type.
+func ParseNumeric(s string) (*Numeric, error) {
+	p := MakeGeneralNumericParser()
+	return p.parse(s)
 }

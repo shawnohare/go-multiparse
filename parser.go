@@ -80,7 +80,7 @@ func (p Parser) ParseFloat(s string) (float64, error) {
 	return 0.0, errors.New(ParseFloatError)
 }
 
-// ParseMoneyreports whether the string parses to a moneytary value
+// ParseMoney reports whether the string parses to a moneytary value
 // according to the parser rules.
 func (p Parser) ParseMoney(s string) (*Money, error) {
 	parsed, err := p.parse(s)
@@ -95,7 +95,7 @@ func (p Parser) ParseMoney(s string) (*Money, error) {
 	return nil, errors.New(ParseMoneyError)
 }
 
-// ParseMoneyreports whether the string parses to a datetime
+// ParseTime reports whether the string parses to a datetime
 // according to the parser rules.
 func (p Parser) ParseTime(s string) (*Time, error) {
 	parsed, err := p.parse(s)

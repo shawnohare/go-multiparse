@@ -65,11 +65,6 @@ func TestTimeType(t *testing.T) {
 	assert.NotEmpty(t, tt.Type())
 }
 
-func TestTimeValue(t *testing.T) {
-	tt := new(Time)
-	assert.Equal(t, *tt, *(tt.Value().(*Time)))
-}
-
 func TestTimeParserParseType(t *testing.T) {
 	p := MakeGeneralTimeParser()
 	expected, _ := time.Parse("2006-01-02", "2015-01-02")

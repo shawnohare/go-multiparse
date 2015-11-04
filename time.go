@@ -56,9 +56,6 @@ type Time struct {
 // Type is the string name for this any Time instance.
 func (t Time) Type() string { return "time" }
 
-// Value returns the instance as an interface.
-func (t Time) Value() interface{} { return &t }
-
 // String that can parse into a datetime.
 func (t Time) String() string { return t.parsed }
 
