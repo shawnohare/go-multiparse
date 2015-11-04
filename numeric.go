@@ -87,8 +87,18 @@ func MakeNumericParser(currencySym, digitSep, decimalSep string) *NumericParser 
 		",": "[,]",
 	}
 
+	// Construct the predefined currency regex (dcre) in a series of steps.
+	tmp := []string{
+		"^\\p{Sc}",                   // Perl currency symbol
+		"^Дин\\.",                    // Serbian Dinar
+		"^p\\.",                      // Belarus Ruble
+		"^[SB]/\\.",                  // Peru Nuevo Sol and Panama Balboa
+		"^[^0-9\\.\\+\\s-]{1,3}\\s?", // Match things like Lek, HK$ or "USD "
+	}
+	cre := strings.Join(tmp, "|")
+
 	currencyMap := map[string]string{
-		"":  "^[^0-9-\\+\\.]+",
+		"":  cre,
 		"$": "^[\\$]",
 	}
 

@@ -25,6 +25,36 @@ func TestMoneyBigFloat(t *testing.T) {
 	assert.NotEqual(t, 0.0, x)
 }
 
+func TestCurrencySymbolMatching(t *testing.T) {
+	symbols := []string{
+		"Lek",
+		"$",
+		"₡",
+		"؋",
+		"﷼",
+		"ƒ",
+		"p.",
+		"RD$",
+		"₩",
+		"S/.",
+		"p.",
+		"Дин.",
+		"₪",
+		"₹",
+		"₱",
+		"₺",
+	}
+
+	p := MakeNumericParser("", "", "")
+	// Make sure we accurately detect currency symbols.
+	for _, s := range symbols {
+		// t.Log(s)
+		assert.True(t, p.currencyRegex.MatchString(s))
+		// Make sure we remove the entire currency symbol.
+		assert.Equal(t, "", p.removeCurrencySymbol(s))
+	}
+}
+
 func TestMoneyParserParse(t *testing.T) {
 	passes := []string{
 		"123",
@@ -85,8 +115,7 @@ func TestMoneyParserSanitize(t *testing.T) {
 		out string
 	}{
 		{"$123,456", "123.456"},
-		{"USD123,456", "123.456"},
-		{"CURRENCY 123,456", "123.456"},
+		{"USD 123,456", "123.456"},
 		{"123.456", "123456"},
 	}
 
@@ -149,17 +178,12 @@ func TestParseMoney(t *testing.T) {
 		{"-123,456,789.12", -1 * m1},
 		{"+123.456.789,12", m1},
 		{"$123.456.789,12", m1},
-		{"CURRENCY 123,456,789.12", m1},
-		{"CURRENCY 123.456.789,12", m1},
 		{"$123,456,789", m2},
 		{"$123.456.789", m2},
-		{"CURRENCY 123,456,789", m2},
 		{"123,456,789", m2},
 		{"123.456.789", m2},
 		{"$123,456.00", m3},
 		{"$123,456", m3},
-		{"CURRENCY 123,456", m3},
-		{"CURRENCY -123,456", -1 * m3},
 		{"123,456", m3},
 		{"123456", m3},
 		{"123456.00", m3},
@@ -170,7 +194,6 @@ func TestParseMoney(t *testing.T) {
 		{"1.234", m4},
 		{"1234", m4},
 		{"1234.567", 1234.567},
-		{"CURRENCY 1.234", m4},
 		{"1234.5678", 1234.5678},
 		{"1", 1.0},
 		{"1.00", 1.0},
