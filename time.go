@@ -74,15 +74,15 @@ type TimeParser struct {
 	dateLayouts []string
 }
 
-// MakeGeneralTimeParser returns a ready to use datetime parser that
+// NewGeneralTimeParser returns a ready to use datetime parser that
 // attempts to detect datetimes using a number of standard layouts.
-func MakeGeneralTimeParser() *TimeParser {
-	return MakeTimeParser(commonTimeLayouts, commonDateLayouts)
+func NewGeneralTimeParser() *TimeParser {
+	return NewTimeParser(commonTimeLayouts, commonDateLayouts)
 }
 
-// MakeTimeParser produces a custom parser that will attempt to parse
+// NewTimeParser produces a custom parser that will attempt to parse
 // a string using the user input time and date layouts.
-func MakeTimeParser(timeLayouts []string, dateLayouts []string) *TimeParser {
+func NewTimeParser(timeLayouts []string, dateLayouts []string) *TimeParser {
 	return &TimeParser{
 		timeLayouts: timeLayouts,
 		dateLayouts: dateLayouts,

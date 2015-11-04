@@ -66,7 +66,7 @@ func TestTimeType(t *testing.T) {
 }
 
 func TestTimeParserParseType(t *testing.T) {
-	p := MakeGeneralTimeParser()
+	p := NewGeneralTimeParser()
 	expected, _ := time.Parse("2006-01-02", "2015-01-02")
 	actual, err := p.ParseTime("2015-01-02")
 	assert.NoError(t, err)

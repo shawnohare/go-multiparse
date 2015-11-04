@@ -12,25 +12,25 @@ type Parser struct {
 	time    MultiParse
 }
 
-// MakeGeneralParser constructs a general purpose top-level Parser instance.
+// NewGeneralParser constructs a general purpose top-level Parser instance.
 // It is initialized with the  general numeric and time parsers provided
-// by MakeGeneralNumericParser and MakeGeneralTimeParser.
-func MakeGeneralParser() *Parser {
-	return MakeParser(MakeGeneralNumericParser(), MakeGeneralTimeParser())
+// by NewGeneralNumericParser and NewGeneralTimeParser.
+func NewGeneralParser() *Parser {
+	return NewParser(NewGeneralNumericParser(), NewGeneralTimeParser())
 }
 
-// MakeUSDParser constructs a top-level Parser instance that can more
+// NewUSDParser constructs a top-level Parser instance that can more
 // accurately detect USD monetary strings. For example, it will
 // parse "$123,456" as a monetary integer.
-func MakeUSDParser() *Parser {
-	return MakeParser(MakeUSDNumericParser(), MakeGeneralTimeParser())
+func NewUSDParser() *Parser {
+	return NewParser(NewUSDNumericParser(), NewGeneralTimeParser())
 }
 
-// MakeParser is a general purpose parser that uses the passed in
+// NewParser is a general purpose parser that uses the passed in
 // MultiParse interfaces to determine whether a string is a numeric or
 // time representation.  The provided parsers should return *Numeric and
 // *Time instances, respectively.
-func MakeParser(numericParser MultiParse, timeParser MultiParse) *Parser {
+func NewParser(numericParser MultiParse, timeParser MultiParse) *Parser {
 	return &Parser{
 		numeric: numericParser,
 		time:    timeParser,

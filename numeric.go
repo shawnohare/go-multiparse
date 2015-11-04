@@ -46,25 +46,25 @@ type NumericParser struct {
 	currencyRegex *regexp.Regexp
 }
 
-// MakeGeneralNumericParser with the most general dictionary.  The dictionary
+// NewGeneralNumericParser with the most general dictionary.  The dictionary
 // values are all empty strings, and so this parser is agnostic to
 // whether "," indicates a digit or decimal separator.  Moreover, it
 // considers anything in the compliment of { +, -, 0, 1, ..., 9, \s }
 // to be a currency symbol.
 //
 // This parser interprets "123.456" and "123,456" as integer values.
-func MakeGeneralNumericParser() *NumericParser {
-	return MakeNumericParser("", "", "")
+func NewGeneralNumericParser() *NumericParser {
+	return NewNumericParser("", "", "")
 }
 
-// MakeUSDNumericParser is configured with a currency symbol "$",
+// NewUSDNumericParser is configured with a currency symbol "$",
 // digit separator ",", and decimal separator ".".
 // It properly detects that "123.456" is a real number, but not an integer.
-func MakeUSDNumericParser() *NumericParser {
-	return MakeNumericParser("$", ",", ".")
+func NewUSDNumericParser() *NumericParser {
+	return NewNumericParser("$", ",", ".")
 }
 
-// MakeNumericParser with the dictionary defined by the inititialization
+// NewNumericParser with the dictionary defined by the inititialization
 // parameters.
 //
 // Valid inputs for the currency symbol are: "", "$", or any
@@ -72,7 +72,7 @@ func MakeUSDNumericParser() *NumericParser {
 //
 // Valid inputs for the separators are: "", ".", ",", or any
 // regular expression.
-func MakeNumericParser(currencySym, digitSep, decimalSep string) *NumericParser {
+func NewNumericParser(currencySym, digitSep, decimalSep string) *NumericParser {
 	p := &NumericParser{
 		CurrencySymbol:   currencySym,
 		DigitSeparator:   digitSep,

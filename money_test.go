@@ -17,7 +17,7 @@ func TestMoneyParsedString(t *testing.T) {
 }
 
 func TestMoneyBigFloat(t *testing.T) {
-	p := MakeUSDNumericParser()
+	p := NewUSDNumericParser()
 	m, _ := p.ParseMoney("123")
 	bf, err := m.BigFloat()
 	assert.NoError(t, err)
@@ -45,12 +45,12 @@ func TestCurrencySymbolMatching(t *testing.T) {
 		"₺",
 	}
 
-	p := MakeNumericParser("", "", "")
-	// Make sure we accurately detect currency symbols.
+	p := NewNumericParser("", "", "")
+	// New sure we accurately detect currency symbols.
 	for _, s := range symbols {
 		// t.Log(s)
 		assert.True(t, p.currencyRegex.MatchString(s))
-		// Make sure we remove the entire currency symbol.
+		// New sure we remove the entire currency symbol.
 		assert.Equal(t, "", p.removeCurrencySymbol(s))
 	}
 }
@@ -64,21 +64,21 @@ func TestMoneyParserParse(t *testing.T) {
 	}
 
 	for _, tt := range passes {
-		p := MakeNumericParser("", "", "")
+		p := NewNumericParser("", "", "")
 		_, err := p.Parse(tt)
 		assert.NoError(t, err)
 	}
 	for _, tt := range fails {
-		p := MakeNumericParser("", "", "")
+		p := NewNumericParser("", "", "")
 		_, err := p.Parse(tt)
 		assert.Error(t, err)
 	}
 }
 
-func TestMakeNumericParserCustom(t *testing.T) {
-	p := MakeUSDNumericParser()
-	c := MakeNumericParser("^[\\$]", "[,]", "[\\.]")
-	d := MakeNumericParser("$", ",", ".")
+func TestNewNumericParserCustom(t *testing.T) {
+	p := NewUSDNumericParser()
+	c := NewNumericParser("^[\\$]", "[,]", "[\\.]")
+	d := NewNumericParser("$", ",", ".")
 	assert.Equal(t, "^[\\$]", p.currencyReStr)
 	assert.Equal(t, "^[\\$]", c.currencyReStr)
 	assert.Equal(t, "^[\\$]", d.currencyReStr)
@@ -99,7 +99,7 @@ func TestUSDMoneyParserSanitize(t *testing.T) {
 		{"123,456", "123456"},
 	}
 
-	s := MakeUSDNumericParser()
+	s := NewUSDNumericParser()
 	for _, tt := range tests {
 		sanitized, err := s.sanitize(tt.in)
 		assert.Equal(t, tt.out, sanitized)
@@ -119,7 +119,7 @@ func TestMoneyParserSanitize(t *testing.T) {
 		{"123.456", "123456"},
 	}
 
-	s := MakeNumericParser("", ".", ",")
+	s := NewNumericParser("", ".", ",")
 	for _, tt := range tests {
 		sanitized, err := s.sanitize(tt.in)
 		assert.Equal(t, tt.out, sanitized)
@@ -151,7 +151,7 @@ func TestUSDMoneyParserParse(t *testing.T) {
 		"",
 	}
 
-	parser := MakeNumericParser("$", ",", ".")
+	parser := NewNumericParser("$", ",", ".")
 
 	for _, tt := range passes {
 		// t.Log(tt)
@@ -222,7 +222,7 @@ func TestParseMoney(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		parser := MakeGeneralNumericParser()
+		parser := NewGeneralNumericParser()
 		m, err := ParseMoney(tt.in)
 		assert.NoError(t, err)
 		m2, err2 := parser.ParseMoney(tt.in)

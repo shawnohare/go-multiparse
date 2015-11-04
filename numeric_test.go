@@ -8,7 +8,7 @@ import (
 )
 
 func TestNumericParserParseType(t *testing.T) {
-	p := MakeGeneralNumericParser()
+	p := NewGeneralNumericParser()
 	s := "123"
 	n, _ := p.ParseType(s)
 	m, _ := p.ParseNumeric(s)
@@ -93,7 +93,7 @@ func TestNumericParserParse(t *testing.T) {
 		},
 	}
 
-	p := MakeGeneralNumericParser()
+	p := NewGeneralNumericParser()
 	for _, tt := range tests {
 		nI, err := p.Parse(tt.in)
 		m, _ := p.ParseNumeric(tt.in)
@@ -115,7 +115,7 @@ func TestParseNumericParseMoney(t *testing.T) {
 	var err error
 	good := "$123"
 	bad := "abc"
-	p := MakeGeneralNumericParser()
+	p := NewGeneralNumericParser()
 	_, err = p.ParseMoney(good)
 	assert.NoError(t, err)
 	_, err = p.ParseMoney(bad)
@@ -178,7 +178,7 @@ func TestStandardNumericParserParse(t *testing.T) {
 		},
 	}
 
-	p := MakeUSDNumericParser()
+	p := NewUSDNumericParser()
 	for _, tt := range tests {
 		nI, err := p.Parse(tt.in)
 		m, _ := p.ParseNumeric(tt.in)
@@ -296,7 +296,7 @@ func TestParseNumeric(t *testing.T) {
 		"abc",
 	}
 
-	p := MakeGeneralNumericParser()
+	p := NewGeneralNumericParser()
 	for _, tt := range tests {
 		x, err := ParseNumeric(tt)
 		y, err2 := p.parse(tt)
@@ -317,7 +317,7 @@ func TestNumericType(t *testing.T) {
 		{"$123.5", "money"},
 	}
 
-	p := MakeGeneralNumericParser()
+	p := NewGeneralNumericParser()
 	for _, tt := range tests {
 		x, _ := p.parse(tt.in)
 		assert.Equal(t, tt.out, x.Type())

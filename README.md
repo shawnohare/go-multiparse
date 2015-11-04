@@ -18,14 +18,14 @@ digit separators.
 ### Parsers
 
 To parse multiple strings, we recommend using a MultiParse interface.
-The `MakeGeneralParser` function returns a general-purpose parser that
+The `NewGeneralParser` function returns a general-purpose parser that
 is read to use.  The `Parser.ParseType` method for this general-purpose
 parser is equivalent to the package's `Parse`, except it avoids
 uncessary struct initialization.
 
 ## USD 
 
-The `MakeUSDParser` function returns a ready to use parser that
+The `NewUSDParser` function returns a ready to use parser that
 recognizes `"$"` as the only currency symbol and assumes that the
 digit and decimal separators are `","` and `"."`, respectively.
 
@@ -69,8 +69,8 @@ func main() {
 	}
 
 	// A general purpose parser that will produce the same results as above
-	// is constructed by the MakeGeneralParser method.
-	parser := mp.MakeGeneralParser()
+	// is constructed by the NewGeneralParser method.
+	parser := mp.NewGeneralParser()
 	// The ParseType method for this parser is equivalent to the package's
 	// Parse function.
 	parsed1, _ := mp.Parse("123.4")
@@ -82,6 +82,6 @@ func main() {
 	log.Println(reflect.DeepEqual(parsed1, parsed3)) // true
 
 	// A less general but more accurate parser that can handle USD money
-	// strings can be constructed via MakeUSDParser()
+	// strings can be constructed via NewUSDParser()
 }
 ```

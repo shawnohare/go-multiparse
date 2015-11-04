@@ -20,8 +20,8 @@ func (b BadTimeParser) Parse(s string) (interface{}, error) {
 	return "not a time", nil
 }
 
-func TestMakeUSDParser(t *testing.T) {
-	parser := MakeUSDParser()
+func TestNewUSDParser(t *testing.T) {
+	parser := NewUSDParser()
 	parsed, _ := parser.ParseType("$123,456")
 	m, _ := parsed.Money()
 	f, err := m.Float64()
@@ -105,7 +105,7 @@ func TestParseInvalidCase(t *testing.T) {
 func TestBadParsers(t *testing.T) {
 	b1 := new(BadNumericParser)
 	b2 := new(BadTimeParser)
-	parser := MakeParser(b1, b2)
+	parser := NewParser(b1, b2)
 	_, err := parser.Parse("123")
 	assert.Error(t, err)
 	_, err = parser.ParseType("123")
@@ -113,7 +113,7 @@ func TestBadParsers(t *testing.T) {
 
 func TestParserParseType(t *testing.T) {
 	var err error
-	p := MakeGeneralParser()
+	p := NewGeneralParser()
 
 	// Pass
 	passes := []string{"123"}
@@ -140,7 +140,7 @@ func TestParserParseType(t *testing.T) {
 
 func TestParserParseInt(t *testing.T) {
 	var err error
-	p := MakeGeneralParser()
+	p := NewGeneralParser()
 
 	// Pass
 	_, err = p.ParseInt("123")
@@ -165,7 +165,7 @@ func TestParserParseInt(t *testing.T) {
 
 func TestParserParseFloat(t *testing.T) {
 	var err error
-	p := MakeGeneralParser()
+	p := NewGeneralParser()
 
 	// Pass
 	_, err = p.ParseFloat("123")
@@ -189,7 +189,7 @@ func TestParserParseFloat(t *testing.T) {
 
 func TestParserParseMoney(t *testing.T) {
 	var err error
-	p := MakeGeneralParser()
+	p := NewGeneralParser()
 
 	// Pass
 	_, err = p.ParseMoney("123")
@@ -214,7 +214,7 @@ func TestParserParseMoney(t *testing.T) {
 
 func TestParserParseTime(t *testing.T) {
 	var err error
-	p := MakeGeneralParser()
+	p := NewGeneralParser()
 
 	// Pass
 	_, err = p.ParseTime("2015-06-15")
