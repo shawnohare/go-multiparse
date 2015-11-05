@@ -19,60 +19,47 @@ func (b BadTimeParser) Parse(s string) (interface{}, error) {
 	return "not a time", nil
 }
 
+type BadBoolParser struct{}
+
+func (b BadBoolParser) Parse(s string) (interface{}, error) {
+	return "not a bool", nil
+}
+
 func TestNewUSDParser(t *testing.T) {
 	parser := NewUSDParser()
-	parsed, _ := parser.ParseType("$123,456")
-	m, _ := parsed.Money()
-	f, err := m.Float64()
+	parsed, err := parser.ParseType("$123,456")
 	assert.NoError(t, err)
-	assert.Equal(t, 123456.0, f)
+	assert.Equal(t, 123456.0, parsed.Float())
 }
 
 func TestParseIntCase(t *testing.T) {
 
 	parsed, err := Parse("123")
 	assert.NoError(t, err)
-	assert.Equal(t, "123", parsed.String())
-
 	assert.True(t, parsed.IsInt())
 	assert.True(t, parsed.IsNumeric())
-	y, _ := parsed.Numeric()
-	f, _ := y.Int()
-	f2, _ := parsed.Int()
+	f := parsed.Int()
+	f2 := parsed.Int()
 	assert.Equal(t, 123, f)
 	assert.Equal(t, 123, f2)
 }
 
 func TestParseFloatCase(t *testing.T) {
-
 	parsed, err := Parse("1234.5")
 	assert.NoError(t, err)
-	assert.Equal(t, "1234.5", parsed.String())
-
 	assert.True(t, parsed.IsFloat())
 	assert.True(t, parsed.IsNumeric())
-	y, _ := parsed.Numeric()
-	f, _ := y.Float()
-	f2, _ := parsed.Float()
+	f := parsed.Float()
 	assert.Equal(t, 1234.5, f)
-	assert.Equal(t, 1234.5, f2)
 }
 
 func TestParserMoneyCase(t *testing.T) {
-
 	input := "$1234.5"
 	parsed, err := Parse(input)
 	assert.NoError(t, err)
-	assert.Equal(t, "$1234.5", parsed.String())
-
 	assert.True(t, parsed.IsMoney())
 	assert.True(t, parsed.IsNumeric())
-	y, _ := parsed.Numeric()
-	f, _ := y.Money()
-	f2, _ := ParseMoney(input)
-	f3, _ := parsed.Money()
-	assert.Equal(t, *f2, *f)
-	assert.Equal(t, *f2, *f3)
+	assert.Equal(t, 1234.5, parsed.Float())
 }
 
 func TestParseInvalidCase(t *testing.T) {
@@ -92,7 +79,8 @@ func TestParseInvalidCase(t *testing.T) {
 func TestBadParsers(t *testing.T) {
 	b1 := new(BadNumericParser)
 	b2 := new(BadTimeParser)
-	parser := NewParser(b1, b2)
+	b3 := new(BadBoolParser)
+	parser := NewCustomParser(b1, b2, b3)
 	_, err := parser.Parse("123")
 	assert.Error(t, err)
 	_, err = parser.ParseType("123")
@@ -100,7 +88,7 @@ func TestBadParsers(t *testing.T) {
 
 func TestParserParseType(t *testing.T) {
 	var err error
-	p := NewGeneralParser()
+	p := NewParser()
 
 	// Pass
 	passes := []string{"123"}
@@ -127,7 +115,7 @@ func TestParserParseType(t *testing.T) {
 
 func TestParserParseInt(t *testing.T) {
 	var err error
-	p := NewGeneralParser()
+	p := NewParser()
 
 	// Pass
 	_, err = p.ParseInt("123")
@@ -152,18 +140,32 @@ func TestParserParseInt(t *testing.T) {
 
 func TestParserParseFloat(t *testing.T) {
 	var err error
-	p := NewGeneralParser()
+	p := NewParser()
 
 	// Pass
+	passes := []string{
+		"123",
+		"123.4",
+		"123,456",
+		"$123.4",
+	}
+
+	for _, tt := range passes {
+		_, err = p.ParseFloat(tt)
+		assert.NoError(t, err)
+		_, err = ParseFloat(tt)
+		assert.NoError(t, err)
+	}
 	_, err = p.ParseFloat("123")
-	assert.NoError(t, err)
 	_, err = ParseFloat("123")
 	assert.NoError(t, err)
 
 	// Fail
 	failures := []string{
 		"abc",
-		"$123.4",
+		"",
+		"..",
+		"3i",
 	}
 
 	for _, f := range failures {
@@ -174,34 +176,9 @@ func TestParserParseFloat(t *testing.T) {
 	}
 }
 
-func TestParserParseMoney(t *testing.T) {
-	var err error
-	p := NewGeneralParser()
-
-	// Pass
-	_, err = p.ParseMoney("123")
-	assert.NoError(t, err)
-	_, err = ParseMoney("123")
-	assert.NoError(t, err)
-
-	// Fail
-	failures := []string{
-		"abc",
-		"$1..23.4",
-		"2006/01/02",
-	}
-
-	for _, f := range failures {
-		_, err = p.ParseMoney(f)
-		assert.Error(t, err)
-		_, err = ParseMoney(f)
-		assert.Error(t, err)
-	}
-}
-
 func TestParserParseTime(t *testing.T) {
 	var err error
-	p := NewGeneralParser()
+	p := NewParser()
 
 	// Pass
 	_, err = p.ParseTime("2015-06-15")
@@ -228,6 +205,6 @@ func ExampleParseType() {
 	var p *Parsed
 
 	p, _ = Parse("$12,345")
-	fmt.Println(p.Type())
-	// output: money
+	fmt.Println(p.Float())
+	// output: 12345
 }

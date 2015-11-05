@@ -1,6 +1,9 @@
 package multiparse
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 // Parser instances determine whether a string is a numeric or
 // time representation.  Each Parser instance implements
@@ -58,49 +61,13 @@ func (p Parser) ParseType(s string) (*Parsed, error) {
 	return p.parse(s)
 }
 
-// ParseInt reports whether the string parses to an integer according
-// to the parser rules.
-func (p Parser) ParseInt(s string) (int, error) {
-	parsed, err := p.parse(s)
-	if err != nil {
-		return 0, err
-	}
-
-	if f, ok := parsed.Int(); ok {
-		return f, nil
-	}
-
-	return 0, errors.New(ParseIntError)
-}
-
-// ParseFloat reports whether the string parses to a float according
-// to the parser rules.
-func (p Parser) ParseFloat(s string) (float64, error) {
-	parsed, err := p.parse(s)
-	if err != nil || !parsed.IsFloat() {
-		return 0.0, errors.New(ParseFloatError)
-	}
-	f, _ := parsed.Float()
-	return f, 0
-}
-
-// ParseMoney reports whether the string parses to a moneytary value
-// according to the parser rules.
-func (p Parser) ParseMoney(s string) (*Money, error) {
-	parsed, err := p.parse(s)
-	if err != nil || !parsed.IsMoney() {
-		return nil, errors.New(ParseMoneyError)
-	}
-	f, _ := parsed.Money()
-	return f, nil
-}
-
 // ParseTime reports whether the string parses to a datetime
 // according to the parser rules.
-func (p Parser) ParseTime(s string) (*Time, error) {
+func (p Parser) ParseTime(s string) (time.Time, error) {
 	parsed, err := p.parse(s)
 	if err != nil || !parsed.isTime {
-		return nil, errors.New(ParseTimeError)
+		var t time.Time
+		return t, errors.New(ParseTimeError)
 	}
 	return parsed.time, nil
 }
@@ -110,7 +77,35 @@ func (p Parser) ParseNumeric(s string) (*Numeric, error) {
 	if err != nil || !parsed.isNumeric {
 		return nil, errors.New(ParseNumericError)
 	}
-	return parsed.numeric, nil
+	return parsed.Numeric, nil
+}
+
+// ParseInt reports whether the string parses to an integer according
+// to the parser rules.
+func (p Parser) ParseInt(s string) (int, error) {
+	parsed, err := p.parse(s)
+	if err != nil || !parsed.isInt {
+		return 0, errors.New(ParseIntError)
+	}
+	return parsed.Int(), nil
+}
+
+// ParseFloat reports whether the string parses to a float according
+// to the parser rules.
+func (p Parser) ParseFloat(s string) (float64, error) {
+	parsed, err := p.parse(s)
+	if err != nil || !parsed.isFloat {
+		return 0.0, errors.New(ParseFloatError)
+	}
+	return parsed.Float(), nil
+}
+
+func (p Parser) ParseBool(s string) (bool, error) {
+	parsed, err := p.parse(s)
+	if err != nil || !parsed.isBool {
+		return false, errors.New(ParseBoolError)
+	}
+	return parsed.b, nil
 }
 
 // parse a string to determine if it is a valid numeric or time value
@@ -118,40 +113,53 @@ func (p Parser) ParseNumeric(s string) (*Numeric, error) {
 // convert to the appropriate types or when the string does not
 // parse into either a numeric or time type.
 func (p Parser) parse(s string) (*Parsed, error) {
-	var numericAssertError error
-	var timeAssertError error
+	var numericAssertErr error
+	var timeAssertErr error
+	var boolAssertErr error
 
 	parsed := NewParsed()
-	parsed.original = s
 
 	x, numericError := p.numeric.Parse(s)
 	if numericError == nil {
 		switch t := x.(type) {
 		case *Numeric:
 			parsed.isNumeric = true
-			parsed.numeric = t
+			parsed.Numeric = t
 		default:
-			numericAssertError = errors.New(ParseTypeAssertError)
+			numericAssertErr = errors.New(ParseTypeAssertError)
 		}
 	}
 
 	ti, timeError := p.time.Parse(s)
 	if timeError == nil {
 		switch t := ti.(type) {
-		case *Time:
+		case time.Time:
 			parsed.isTime = true
 			parsed.time = t
 		default:
-			timeAssertError = errors.New(ParseTypeAssertError)
+			timeAssertErr = errors.New(ParseTypeAssertError)
 		}
 	}
 
-	if numericAssertError != nil || timeAssertError != nil {
-		err := errors.New(numericAssertError.Error() + timeAssertError.Error())
-		return nil, err
+	b, boolError := p.b.Parse(s)
+	if boolError == nil {
+		switch t := b.(type) {
+		case bool:
+			parsed.isBool = true
+			parsed.b = t
+		default:
+			boolAssertErr = errors.New(ParseBoolError)
+		}
 	}
 
-	if numericError != nil && timeError != nil {
+	if numericAssertErr != nil || timeAssertErr != nil || boolAssertErr != nil {
+		err := numericAssertErr.Error()
+		err += timeAssertErr.Error()
+		err += boolAssertErr.Error()
+		return nil, errors.New(err)
+	}
+
+	if numericError != nil && timeError != nil && boolError != nil {
 		return nil, errors.New(ParseError)
 	}
 

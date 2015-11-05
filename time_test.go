@@ -33,9 +33,7 @@ func TestParseTime(t *testing.T) {
 	for _, st := range timepasses {
 		tt, err := ParseTime(st)
 		assert.NoError(t, err)
-		assert.Equal(t, st, tt.String())
-		assert.NotEmpty(t, tt.Layout())
-		assert.NotEqual(t, 0, tt.Time().Hour())
+		assert.NotEqual(t, 0, tt.Hour())
 		// t.Log(tt.time)
 	}
 
@@ -43,8 +41,7 @@ func TestParseTime(t *testing.T) {
 		tt, err := ParseTime(st)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, st, tt.String())
-		assert.NotEmpty(t, tt.Layout())
-		assert.Equal(t, 0, tt.Time().Hour())
+		assert.Equal(t, 0, tt.Hour())
 		// t.Log(tt.time)
 	}
 
@@ -55,20 +52,10 @@ func TestParseTime(t *testing.T) {
 
 }
 
-func TestTimeString(t *testing.T) {
-	tt, _ := ParseTime("2015-09-12Tflaksjdfl")
-	assert.Equal(t, "2015-09-12", tt.String())
-}
-
-func TestTimeType(t *testing.T) {
-	tt := new(Time)
-	assert.NotEmpty(t, tt.Type())
-}
-
 func TestTimeParserParseType(t *testing.T) {
-	p := NewGeneralTimeParser()
+	p := NewTimeParser()
 	expected, _ := time.Parse("2006-01-02", "2015-01-02")
 	actual, err := p.ParseTime("2015-01-02")
 	assert.NoError(t, err)
-	assert.Equal(t, expected, actual.Time())
+	assert.Equal(t, expected, actual)
 }

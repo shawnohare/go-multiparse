@@ -36,10 +36,9 @@ func TestParseTimeCase(t *testing.T) {
 	input := "2015-01-02"
 	parsed, err := Parse(input)
 	assert.NoError(t, err)
-	assert.Equal(t, input, parsed.String())
 
 	assert.True(t, parsed.IsTime())
-	y, _ := parsed.Time()
+	y := parsed.Time()
 	z, _ := time.Parse("2006-01-02", input)
-	assert.Equal(t, z, y.Time())
+	assert.Equal(t, z, y)
 }

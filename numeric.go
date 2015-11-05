@@ -10,24 +10,10 @@ import (
 // Numeric instances are containers for the various valid numerical types
 // that a string may be parsed into.
 type Numeric struct {
-	original string
-	parsed   string
-	isInt    bool
-	isFloat  bool
-	isMoney  bool
-	money    *Money
-}
-
-// Type is the most specific type the instance represents.
-func (x Numeric) Type() string {
-	if x.isInt {
-		return "int"
-	} else if x.isFloat {
-		return "float"
-	} else if x.isMoney {
-		return "money"
-	}
-	return "None"
+	isInt   bool
+	isFloat bool
+	isMoney bool
+	f       float64
 }
 
 // A NumericParser ingests a string and determines whether it is
@@ -127,23 +113,9 @@ func (p NumericParser) Parse(s string) (interface{}, error) {
 	return p.parse(s)
 }
 
-// ParseType is a synonym for ParseNumeric
-func (p NumericParser) ParseType(s string) (*Numeric, error) {
-	return p.parse(s)
-}
-
 // ParseNumeric a string to determine if it represents a numeric type.
 func (p NumericParser) ParseNumeric(s string) (*Numeric, error) {
 	return p.parse(s)
-}
-
-// ParseMoney parses a string to determine if it is a monetary value.
-func (p NumericParser) ParseMoney(s string) (*Money, error) {
-	n, err := p.parse(s)
-	if err != nil {
-		return nil, err
-	}
-	return n.money, nil
 }
 
 func (p NumericParser) removeCurrencySymbol(s string) string {
@@ -264,7 +236,6 @@ func (p NumericParser) parse(s string) (*Numeric, error) {
 		reStr    string
 		re       *regexp.Regexp
 		parseErr = errors.New(ParseNumericError)
-		original = s
 	)
 
 	// Record whether the input string has a currency symbol.
@@ -339,85 +310,38 @@ func (p NumericParser) parse(s string) (*Numeric, error) {
 
 	}
 
-	if err != nil {
+	parsed = sign + parsed
+	f, ferr := strconv.ParseFloat(parsed, 64)
+	if err != nil || ferr != nil {
 		return nil, err
 	}
 
-	// We now assume that the input string is valid and sufficnetly parsed.
-	parsed = sign + parsed
-	m := &Money{
-		original: original,
-		parsed:   parsed,
+	// We now know that the parsed string correctly parses as a float.
+	n = &Numeric{
+		isFloat: true,
+		f:       f,
 	}
-
 	if hasCurrency {
-		n = &Numeric{
-			parsed:  parsed,
-			isMoney: true,
-			money:   m,
-		}
-		return n, nil
+		n.isMoney = true
 	}
-
 	_, err = strconv.Atoi(parsed)
 	if err == nil {
-		n = &Numeric{
-			parsed:  parsed,
-			isInt:   true,
-			isFloat: true,
-			isMoney: true,
-			money:   m,
-		}
-		return n, nil
+		n.isInt = true
 	}
 
-	_, err = strconv.ParseFloat(parsed, 64)
-	n = &Numeric{
-		parsed:  parsed,
-		isFloat: true,
-		isMoney: true,
-		money:   m,
-	}
-
-	// The last err reported by strconv.ParseFloat should always be false
-	// if our previous parsing is without logic errors.
-	return n, err
-}
-
-func (x Numeric) String() string {
-	return x.parsed
+	return n, nil
 }
 
 // Int reports whether the Numeric instance can be an integer
 // and returns its value.
 func (x Numeric) Int() int {
-	var y int
-	if x.isInt {
-		y, _ = strconv.Atoi(x.parsed)
-	}
-	return y
+	return int(x.f)
 }
 
 // Float reports whether the Numeric instance can be a float
 // and returns its value.
 func (x Numeric) Float() float64 {
-	var y float64
-	if x.isFloat {
-		y, _ = strconv.ParseFloat(x.parsed, 64)
-	}
-	return y
-}
-
-// Money reports whether the Numeric instance represents a monetary
-// value and returns this value.
-func (x Numeric) Money() *Money {
-	y := new(Money)
-
-	if x.isMoney && x.money != nil {
-		y = x.money
-	}
-
-	return y
+	return x.f
 }
 
 // IsInt reports if the instance can represent an integer.
@@ -430,7 +354,8 @@ func (x Numeric) IsFloat() bool {
 	return x.isFloat
 }
 
-// IsMoney reports if the instance can represent a monetary value.
+// IsMoney reports if the original string has currency symbols
+// and correctly prases to a numeric value.
 func (x Numeric) IsMoney() bool {
 	return x.isMoney
 }

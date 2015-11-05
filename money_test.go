@@ -6,25 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMoneyString(t *testing.T) {
-	m := Money{original: "$123.40"}
-	assert.Equal(t, "$123.40", m.String())
-}
-
-func TestMoneyParsedString(t *testing.T) {
-	m := Money{original: "$123.40", parsed: "123.40"}
-	assert.Equal(t, "123.40", m.ParsedString())
-}
-
-func TestMoneyBigFloat(t *testing.T) {
-	p := NewUSDNumericParser()
-	m, _ := p.ParseMoney("123")
-	bf, err := m.BigFloat()
-	assert.NoError(t, err)
-	x, _ := bf.Float64()
-	assert.NotEqual(t, 0.0, x)
-}
-
 func TestCurrencySymbolMatching(t *testing.T) {
 	symbols := []string{
 		"Lek",
@@ -223,17 +204,16 @@ func TestParseMoney(t *testing.T) {
 
 	for _, tt := range tests {
 		parser := NewNumericParser()
-		m, err := ParseMoney(tt.in)
+		m, err := ParseNumeric(tt.in)
 		assert.NoError(t, err)
-		m2, err2 := parser.ParseMoney(tt.in)
+		m2, err2 := parser.ParseNumeric(tt.in)
 		assert.NoError(t, err2)
 		assert.NotNil(t, m)
 		assert.NotNil(t, m2)
 		// t.Log(tt.in)
 		if err == nil {
-			ac, err2 := m.Float64()
-			ac2, _ := m2.Float64()
-			assert.NoError(t, err2)
+			ac := m.Float()
+			ac2 := m2.Float()
 			assert.NotEqual(t, 0.0, ac)
 			assert.Equal(t, tt.out, ac)
 			assert.Equal(t, tt.out, ac2)
@@ -241,17 +221,8 @@ func TestParseMoney(t *testing.T) {
 	}
 
 	for _, tt := range errorTests {
-		m, err := ParseMoney(tt)
+		m, err := ParseNumeric(tt)
 		assert.Nil(t, m)
 		assert.Error(t, err)
 	}
-}
-
-func TestBadMoney(t *testing.T) {
-	var err error
-	m := new(Money)
-	_, err = m.Float64()
-	assert.Error(t, err)
-	_, err = m.BigFloat()
-	assert.Error(t, err)
 }

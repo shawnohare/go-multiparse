@@ -46,25 +46,6 @@ var commonDateLayouts = []string{
 	"Jan. 2 2006",
 }
 
-// Time structure that represents a string which parses as a datetime.
-type Time struct {
-	parsed string
-	layout string
-	time   time.Time
-}
-
-// Type is the string name for this any Time instance.
-func (t Time) Type() string { return "time" }
-
-// String that can parse into a datetime.
-func (t Time) String() string { return t.parsed }
-
-// Time returns the parsed string as a time.Time instace .
-func (t Time) Time() time.Time { return t.time }
-
-// Layout detected for datetime conversion.
-func (t Time) Layout() string { return t.layout }
-
 // TimeParser instances are responsible for parsing a string to determine
 // whether it is a datetime representation.  It is simply a container for
 // a number of datetime and date layouts.  The parser iterates over
@@ -76,13 +57,13 @@ type TimeParser struct {
 
 // NewGeneralTimeParser returns a ready to use datetime parser that
 // attempts to detect datetimes using a number of standard layouts.
-func NewGeneralTimeParser() *TimeParser {
-	return NewTimeParser(commonTimeLayouts, commonDateLayouts)
+func NewTimeParser() *TimeParser {
+	return NewCustomTimeParser(commonTimeLayouts, commonDateLayouts)
 }
 
 // NewTimeParser produces a custom parser that will attempt to parse
 // a string using the user input time and date layouts.
-func NewTimeParser(timeLayouts []string, dateLayouts []string) *TimeParser {
+func NewCustomTimeParser(timeLayouts []string, dateLayouts []string) *TimeParser {
 	return &TimeParser{
 		timeLayouts: timeLayouts,
 		dateLayouts: dateLayouts,
@@ -95,21 +76,16 @@ func (p TimeParser) Parse(s string) (interface{}, error) {
 }
 
 // ParseTime is the same as Parse but returns a *Time instance.
-func (p TimeParser) ParseTime(s string) (*Time, error) {
+func (p TimeParser) ParseTime(s string) (time.Time, error) {
 	return p.parse(s)
 }
 
 // The main datetime parsing logic.
-func (p TimeParser) parse(s string) (*Time, error) {
+func (p TimeParser) parse(s string) (time.Time, error) {
 	// Determine whether s has a valid layout that includes time.
 	for _, layout := range p.timeLayouts {
 		if pt, err := time.Parse(layout, s); err == nil {
-			t := &Time{
-				parsed: s,
-				layout: layout,
-				time:   pt,
-			}
-			return t, nil
+			return pt, nil
 		}
 	}
 
@@ -118,19 +94,16 @@ func (p TimeParser) parse(s string) (*Time, error) {
 	d := re.FindString(s)
 
 	if d == "" {
-		return nil, errors.New(ParseTimeError)
+		var t time.Time
+		return t, errors.New(ParseTimeError)
 	}
 
-	t := new(Time)
 	for _, layout := range p.dateLayouts {
 		if pt, err := time.Parse(layout, d); err == nil {
-			t = &Time{
-				parsed: d,
-				layout: layout,
-				time:   pt,
-			}
-			break
+			return pt, nil
 		}
 	}
+
+	var t time.Time
 	return t, nil
 }

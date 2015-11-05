@@ -2,6 +2,8 @@
 // parsing on strings.
 package multiparse
 
+import "time"
+
 var context = struct {
 	p *Parser
 }{
@@ -39,17 +41,11 @@ func ParseFloat(s string) (float64, error) {
 	return context.p.ParseFloat(s)
 }
 
-// ParseMoney reports whether the string parses to a moneytary value
-// according to the parser rules.
-func ParseMoney(s string) (*Money, error) {
-	return context.p.ParseMoney(s)
-}
-
 // ParseTime determines whether the input string parses for any of
 // a number of common layouts. Calling this function is equivalent to
 // constructing a general time parser with NewGeneralTimeParser
 // and invoking its ParseTime method.
-func ParseTime(s string) (*Time, error) {
+func ParseTime(s string) (time.Time, error) {
 	return context.p.ParseTime(s)
 }
 
@@ -61,6 +57,5 @@ func ParseNumeric(s string) (*Numeric, error) {
 // ParseBool determines whether the string represents a boolean value.
 // The strings "0" and "1" are interpreted as Boolean in this case.
 func ParseBool(s string) (bool, error) {
-	p := NewBooleanParser()
-	return p.parse(s)
+	return context.p.ParseBool(s)
 }
