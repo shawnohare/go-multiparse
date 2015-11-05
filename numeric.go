@@ -89,11 +89,11 @@ func NewNumericParser(currencySym, digitSep, decimalSep string) *NumericParser {
 
 	// Construct the predefined currency regex (dcre) in a series of steps.
 	tmp := []string{
-		"^\\p{Sc}",                   // Perl currency symbol
-		"^Дин\\.",                    // Serbian Dinar
-		"^p\\.",                      // Belarus Ruble
-		"^[SB]/\\.",                  // Peru Nuevo Sol and Panama Balboa
-		"^[^0-9\\.\\+\\s-]{1,3}\\s?", // Match things like Lek, HK$ or "USD "
+		"^\\p{Sc}",                    // Perl currency symbol
+		"^Дин\\.",                     // Serbian Dinar
+		"^p\\.",                       // Belarus Ruble
+		"^[SB]/\\.",                   // Peru Nuevo Sol and Panama Balboa
+		"^[^0-9\\.\\+\\s-_]{1,3}\\s?", // Match things like Lek, HK$ or "USD "
 	}
 	cre := strings.Join(tmp, "|")
 
@@ -273,15 +273,6 @@ func (p NumericParser) parse(s string) (*Numeric, error) {
 		s = p.removeCurrencySymbol(s)
 	}
 
-	// Ensure the input has at least one digit.
-	re = regexp.MustCompile(".*[0-9].*")
-	if !re.MatchString(s) {
-		return nil, parseErr
-	}
-
-	// Remove the first currency symbols that appear.
-	s = p.removeCurrencySymbol(s)
-
 	// Now determine whether the string's initial character is a + or -.
 	// If so, strip it away and record the sign.
 	sign = ""
@@ -293,8 +284,16 @@ func (p NumericParser) parse(s string) (*Numeric, error) {
 		s = s[1:]
 	}
 
-	// A valid string now either begins with digits or a decimal separator.
-	// If it begns with the later, prepend a 0.
+	// Since currency and sign symbols have been stripped, we now check that the
+	// expression begins with a decimal separator (possibly) and digit.
+	// Valid strings thus look like either: .x* or x*.
+	reStr = "^" + p.decimalReStr + "?" + "[0-9]"
+	re = regexp.MustCompile(reStr)
+	if !re.MatchString(s) {
+		return nil, parseErr
+	}
+
+	// Prepend a 0 if the string begins with a decimal separator.
 	reStr = "^" + p.decimalReStr
 	re = regexp.MustCompile(reStr)
 	if re.MatchString(s) {
