@@ -10,30 +10,38 @@ import "errors"
 type Parser struct {
 	numeric MultiParse
 	time    MultiParse
+	b       MultiParse
 }
 
 // NewGeneralParser constructs a general purpose top-level Parser instance.
 // It is initialized with the  general numeric and time parsers provided
 // by NewGeneralNumericParser and NewGeneralTimeParser.
-func NewGeneralParser() *Parser {
-	return NewParser(NewGeneralNumericParser(), NewGeneralTimeParser())
+func NewParser() *Parser {
+	n := NewNumericParser()
+	t := NewTimeParser()
+	b := NewBooleanParser()
+	return NewCustomParser(n, t, b)
 }
 
 // NewUSDParser constructs a top-level Parser instance that can more
 // accurately detect USD monetary strings. For example, it will
 // parse "$123,456" as a monetary integer.
 func NewUSDParser() *Parser {
-	return NewParser(NewUSDNumericParser(), NewGeneralTimeParser())
+	n := NewUSDNumericParser()
+	t := NewTimeParser()
+	b := NewBooleanParser()
+	return NewCustomParser(n, t, b)
 }
 
 // NewParser is a general purpose parser that uses the passed in
 // MultiParse interfaces to determine whether a string is a numeric or
 // time representation.  The provided parsers should return *Numeric and
 // *Time instances, respectively.
-func NewParser(numericParser MultiParse, timeParser MultiParse) *Parser {
+func NewCustomParser(numeric, time, boolean MultiParse) *Parser {
 	return &Parser{
-		numeric: numericParser,
-		time:    timeParser,
+		numeric: numeric,
+		time:    time,
+		b:       boolean,
 	}
 }
 
@@ -69,45 +77,40 @@ func (p Parser) ParseInt(s string) (int, error) {
 // to the parser rules.
 func (p Parser) ParseFloat(s string) (float64, error) {
 	parsed, err := p.parse(s)
-	if err != nil {
-		return 0.0, err
+	if err != nil || !parsed.IsFloat() {
+		return 0.0, errors.New(ParseFloatError)
 	}
-
-	if f, ok := parsed.Float(); ok {
-		return f, nil
-	}
-
-	return 0.0, errors.New(ParseFloatError)
+	f, _ := parsed.Float()
+	return f, 0
 }
 
 // ParseMoney reports whether the string parses to a moneytary value
 // according to the parser rules.
 func (p Parser) ParseMoney(s string) (*Money, error) {
 	parsed, err := p.parse(s)
-	if err != nil {
-		return nil, err
+	if err != nil || !parsed.IsMoney() {
+		return nil, errors.New(ParseMoneyError)
 	}
-
-	if f, ok := parsed.Money(); ok {
-		return f, nil
-	}
-
-	return nil, errors.New(ParseMoneyError)
+	f, _ := parsed.Money()
+	return f, nil
 }
 
 // ParseTime reports whether the string parses to a datetime
 // according to the parser rules.
 func (p Parser) ParseTime(s string) (*Time, error) {
 	parsed, err := p.parse(s)
-	if err != nil {
-		return nil, err
+	if err != nil || !parsed.isTime {
+		return nil, errors.New(ParseTimeError)
 	}
+	return parsed.time, nil
+}
 
-	if f, ok := parsed.Time(); ok {
-		return f, nil
+func (p Parser) ParseNumeric(s string) (*Numeric, error) {
+	parsed, err := p.parse(s)
+	if err != nil || !parsed.isNumeric {
+		return nil, errors.New(ParseNumericError)
 	}
-
-	return nil, errors.New(ParseTimeError)
+	return parsed.numeric, nil
 }
 
 // parse a string to determine if it is a valid numeric or time value

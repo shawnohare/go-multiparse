@@ -36,5 +36,20 @@ func TestParsedType(t *testing.T) {
 		time:     &Time{},
 	}
 	assert.Equal(t, "time", q.Type())
+}
+
+func TestParsedIs(t *testing.T) {
+	q := &Parsed{
+		original: "2015-06-01",
+		isTime:   true,
+		numeric:  new(Numeric),
+		time:     new(Time),
+	}
+
+	assert.True(t, q.IsTime())
+	assert.False(t, q.IsInt())
+	assert.False(t, q.IsFloat())
+	assert.False(t, q.IsMoney())
+	assert.False(t, q.IsNumeric())
 
 }

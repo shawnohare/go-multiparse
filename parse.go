@@ -2,6 +2,12 @@
 // parsing on strings.
 package multiparse
 
+var context = struct {
+	p *Parser
+}{
+	p: NewParser(),
+}
+
 // MultiParse is the general interface all multiparse parsers implement.
 type MultiParse interface {
 	Parse(string) (interface{}, error)
@@ -12,36 +18,31 @@ type MultiParse interface {
 // ParseType method on a general purpose parser instance returned by
 // NewGeneralParser.
 func Parse(s string) (*Parsed, error) {
-	p := NewGeneralParser()
-	return p.parse(s)
+	return context.p.parse(s)
 }
 
 // ParseType determines whether a numeric or time representation
 // according to the initialzed parsers.
 func ParseType(s string) (*Parsed, error) {
-	p := NewGeneralParser()
-	return p.ParseType(s)
+	return context.p.ParseType(s)
 }
 
 // ParseInt reports whether the string parses to an integer according
 // to the parser rules.
 func ParseInt(s string) (int, error) {
-	p := NewGeneralParser()
-	return p.ParseInt(s)
+	return context.p.ParseInt(s)
 }
 
 // ParseFloat reports whether the string parses to a float according
 // to the parser rules.
 func ParseFloat(s string) (float64, error) {
-	p := NewGeneralParser()
-	return p.ParseFloat(s)
+	return context.p.ParseFloat(s)
 }
 
 // ParseMoney reports whether the string parses to a moneytary value
 // according to the parser rules.
 func ParseMoney(s string) (*Money, error) {
-	p := NewGeneralParser()
-	return p.ParseMoney(s)
+	return context.p.ParseMoney(s)
 }
 
 // ParseTime determines whether the input string parses for any of
@@ -49,12 +50,17 @@ func ParseMoney(s string) (*Money, error) {
 // constructing a general time parser with NewGeneralTimeParser
 // and invoking its ParseTime method.
 func ParseTime(s string) (*Time, error) {
-	p := NewGeneralParser()
-	return p.ParseTime(s)
+	return context.p.ParseTime(s)
 }
 
 // ParseNumeric determines whether the string represents a numeric type.
 func ParseNumeric(s string) (*Numeric, error) {
-	p := NewGeneralNumericParser()
+	return context.p.ParseNumeric(s)
+}
+
+// ParseBool determines whether the string represents a boolean value.
+// The strings "0" and "1" are interpreted as Boolean in this case.
+func ParseBool(s string) (bool, error) {
+	p := NewBooleanParser()
 	return p.parse(s)
 }

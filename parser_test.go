@@ -3,7 +3,6 @@ package multiparse
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -74,18 +73,6 @@ func TestParserMoneyCase(t *testing.T) {
 	f3, _ := parsed.Money()
 	assert.Equal(t, *f2, *f)
 	assert.Equal(t, *f2, *f3)
-}
-
-func TestParseTimeCase(t *testing.T) {
-	input := "2015-01-02"
-	parsed, err := Parse(input)
-	assert.NoError(t, err)
-	assert.Equal(t, input, parsed.String())
-
-	assert.True(t, parsed.IsTime())
-	y, _ := parsed.Time()
-	z, _ := time.Parse("2006-01-02", input)
-	assert.Equal(t, z, y.Time())
 }
 
 func TestParseInvalidCase(t *testing.T) {

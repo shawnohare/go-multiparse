@@ -10,11 +10,12 @@ import (
 // Numeric instances are containers for the various valid numerical types
 // that a string may be parsed into.
 type Numeric struct {
-	parsed  string
-	isInt   bool
-	isFloat bool
-	isMoney bool
-	money   *Money
+	original string
+	parsed   string
+	isInt    bool
+	isFloat  bool
+	isMoney  bool
+	money    *Money
 }
 
 // Type is the most specific type the instance represents.
@@ -53,15 +54,15 @@ type NumericParser struct {
 // to be a currency symbol.
 //
 // This parser interprets "123.456" and "123,456" as integer values.
-func NewGeneralNumericParser() *NumericParser {
-	return NewNumericParser("", "", "")
+func NewNumericParser() *NumericParser {
+	return NewCustomNumericParser("", "", "")
 }
 
 // NewUSDNumericParser is configured with a currency symbol "$",
 // digit separator ",", and decimal separator ".".
 // It properly detects that "123.456" is a real number, but not an integer.
 func NewUSDNumericParser() *NumericParser {
-	return NewNumericParser("$", ",", ".")
+	return NewCustomNumericParser("$", ",", ".")
 }
 
 // NewNumericParser with the dictionary defined by the inititialization
@@ -72,7 +73,7 @@ func NewUSDNumericParser() *NumericParser {
 //
 // Valid inputs for the separators are: "", ".", ",", or any
 // regular expression.
-func NewNumericParser(currencySym, digitSep, decimalSep string) *NumericParser {
+func NewCustomNumericParser(currencySym, digitSep, decimalSep string) *NumericParser {
 	p := &NumericParser{
 		CurrencySymbol:   currencySym,
 		DigitSeparator:   digitSep,
@@ -389,34 +390,34 @@ func (x Numeric) String() string {
 
 // Int reports whether the Numeric instance can be an integer
 // and returns its value.
-func (x Numeric) Int() (int, bool) {
+func (x Numeric) Int() int {
 	var y int
 	if x.isInt {
 		y, _ = strconv.Atoi(x.parsed)
 	}
-	return y, x.isInt
+	return y
 }
 
 // Float reports whether the Numeric instance can be a float
 // and returns its value.
-func (x Numeric) Float() (float64, bool) {
+func (x Numeric) Float() float64 {
 	var y float64
 	if x.isFloat {
 		y, _ = strconv.ParseFloat(x.parsed, 64)
 	}
-	return y, x.isFloat
+	return y
 }
 
 // Money reports whether the Numeric instance represents a monetary
 // value and returns this value.
-func (x Numeric) Money() (*Money, bool) {
+func (x Numeric) Money() *Money {
 	y := new(Money)
 
 	if x.isMoney && x.money != nil {
 		y = x.money
 	}
 
-	return y, x.isMoney
+	return y
 }
 
 // IsInt reports if the instance can represent an integer.

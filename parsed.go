@@ -5,8 +5,10 @@ type Parsed struct {
 	original  string
 	isNumeric bool
 	isTime    bool
+	isBool    bool
 	numeric   *Numeric
 	time      *Time
+	b         bool
 }
 
 // NewParsed returns a Parsed instance with zero values.
@@ -21,24 +23,40 @@ func (p Parsed) String() string {
 	return p.original
 }
 
-// Numeric reports whether the parsed string is a Numeric type and
-// returns its value.
-func (p Parsed) Numeric() (*Numeric, bool) {
+// Numeric instance of the string if it parses as such, or
+// the default value if it does not.
+func (p Parsed) Numeric() *Numeric {
 	if !p.isNumeric {
-		return nil, false
+		return nil
 	}
-
-	return p.numeric, true
+	return p.numeric
 }
 
-// Time reports whether the parsed string represents a datetime and the
-// the *Time that has been parsed.
-func (p Parsed) Time() (*Time, bool) {
+// Time instance of the string if it parses as such, or
+// the default value if it does not.
+func (p Parsed) Time() *Time {
 	if !p.isTime {
-		return nil, false
+		return nil
 	}
+	return p.time
+}
 
-	return p.time, true
+// Bool instance of the string if it parses as such, or
+// the default value if it does not.
+func (p Parsed) Money() *Money {
+	if !p.IsMoney() {
+		return nil
+	}
+	return p.numeric.Money()
+}
+
+// Bool instance of the string if it parses as such, or
+// the default value if it does not.
+func (p Parsed) Bool() bool {
+	if !p.isBool {
+		return false
+	}
+	return true
 }
 
 // Type that the parsed string most specifically represents.
@@ -87,10 +105,4 @@ func (p Parsed) Int() (int, bool) {
 // Float reports if the parsed string is a float and returns the float.
 func (p Parsed) Float() (float64, bool) {
 	return p.numeric.Float()
-}
-
-// Money reports if the parsed string is a monetary value and returns the
-// corresponding Money instance.
-func (p Parsed) Money() (*Money, bool) {
-	return p.numeric.Money()
 }

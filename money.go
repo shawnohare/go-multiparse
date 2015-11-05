@@ -6,6 +6,8 @@ import (
 	"strconv"
 )
 
+// FIXME we don't need the money stuff.  It's overly nuanced?
+
 // A Money instance is a simple representation of a monetary value.  It
 // has access to the original pre-parsed string as well as a few numeric
 // types.

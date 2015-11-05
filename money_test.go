@@ -45,7 +45,7 @@ func TestCurrencySymbolMatching(t *testing.T) {
 		"₺",
 	}
 
-	p := NewNumericParser("", "", "")
+	p := NewCustomNumericParser("", "", "")
 	// New sure we accurately detect currency symbols.
 	for _, s := range symbols {
 		// t.Log(s)
@@ -64,12 +64,12 @@ func TestMoneyParserParse(t *testing.T) {
 	}
 
 	for _, tt := range passes {
-		p := NewNumericParser("", "", "")
+		p := NewNumericParser()
 		_, err := p.Parse(tt)
 		assert.NoError(t, err)
 	}
 	for _, tt := range fails {
-		p := NewNumericParser("", "", "")
+		p := NewNumericParser()
 		_, err := p.Parse(tt)
 		assert.Error(t, err)
 	}
@@ -77,8 +77,8 @@ func TestMoneyParserParse(t *testing.T) {
 
 func TestNewNumericParserCustom(t *testing.T) {
 	p := NewUSDNumericParser()
-	c := NewNumericParser("^[\\$]", "[,]", "[\\.]")
-	d := NewNumericParser("$", ",", ".")
+	c := NewCustomNumericParser("^[\\$]", "[,]", "[\\.]")
+	d := NewCustomNumericParser("$", ",", ".")
 	assert.Equal(t, "^[\\$]", p.currencyReStr)
 	assert.Equal(t, "^[\\$]", c.currencyReStr)
 	assert.Equal(t, "^[\\$]", d.currencyReStr)
@@ -119,7 +119,7 @@ func TestMoneyParserSanitize(t *testing.T) {
 		{"123.456", "123456"},
 	}
 
-	s := NewNumericParser("", ".", ",")
+	s := NewCustomNumericParser("", ".", ",")
 	for _, tt := range tests {
 		sanitized, err := s.sanitize(tt.in)
 		assert.Equal(t, tt.out, sanitized)
@@ -151,7 +151,7 @@ func TestUSDMoneyParserParse(t *testing.T) {
 		"",
 	}
 
-	parser := NewNumericParser("$", ",", ".")
+	parser := NewCustomNumericParser("$", ",", ".")
 
 	for _, tt := range passes {
 		// t.Log(tt)
@@ -222,7 +222,7 @@ func TestParseMoney(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		parser := NewGeneralNumericParser()
+		parser := NewNumericParser()
 		m, err := ParseMoney(tt.in)
 		assert.NoError(t, err)
 		m2, err2 := parser.ParseMoney(tt.in)
