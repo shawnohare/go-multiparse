@@ -17,10 +17,6 @@ func TestParseFail(t *testing.T) {
 	for _, tt := range fails {
 		t.Log(tt)
 		p, err := ParseType(tt)
-		if p != nil {
-			t.Log(p.IsFloat())
-			t.Log(p.IsMoney())
-		}
 		assert.Error(t, err)
 		assert.Nil(t, p)
 	}
