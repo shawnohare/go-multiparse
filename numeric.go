@@ -33,15 +33,10 @@ type NumericParser struct {
 	currencyRegex *regexp.Regexp
 }
 
-// NewGeneralNumericParser with the most general dictionary.  The dictionary
-// values are all empty strings, and so this parser is agnostic to
-// whether "," indicates a digit or decimal separator.  Moreover, it
-// considers anything in the compliment of { +, -, 0, 1, ..., 9, \s }
-// to be a currency symbol.
-//
-// This parser interprets "123.456" and "123,456" as integer values.
+// NewNumericParser with the default dictionary
+// currency symbol -> "", digit separator -> ",", decimal separator -> ".".
 func NewNumericParser() *NumericParser {
-	return NewCustomNumericParser("", "", "")
+	return NewCustomNumericParser("", ",", ".")
 }
 
 // NewUSDNumericParser is configured with a currency symbol "$",

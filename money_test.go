@@ -203,25 +203,21 @@ func TestParseMoney(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		parser := NewNumericParser()
-		m, err := ParseNumeric(tt.in)
+		parser := NewCustomNumericParser("", "", "")
+		m, err := parser.ParseNumeric(tt.in)
 		assert.NoError(t, err)
-		m2, err2 := parser.ParseNumeric(tt.in)
-		assert.NoError(t, err2)
 		assert.NotNil(t, m)
-		assert.NotNil(t, m2)
 		// t.Log(tt.in)
 		if err == nil {
 			ac := m.Float()
-			ac2 := m2.Float()
 			assert.NotEqual(t, 0.0, ac)
 			assert.Equal(t, tt.out, ac)
-			assert.Equal(t, tt.out, ac2)
 		}
 	}
 
 	for _, tt := range errorTests {
-		m, err := ParseNumeric(tt)
+		parser := NewCustomNumericParser("", "", "")
+		m, err := parser.ParseNumeric(tt)
 		assert.Nil(t, m)
 		assert.Error(t, err)
 	}

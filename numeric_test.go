@@ -64,7 +64,7 @@ func TestNumericParserParse(t *testing.T) {
 		},
 		// Another money
 		{
-			"€123,45",
+			"€123.45",
 			&Numeric{
 				isInt:   false,
 				isFloat: true,
@@ -96,7 +96,22 @@ func TestNumericParserParse(t *testing.T) {
 
 }
 
-func TestStandardNumericParserParse(t *testing.T) {
+func TestCustomNumericParserParse(t *testing.T) {
+	in := "€123,45"
+	expected := &Numeric{
+		isInt:   false,
+		isFloat: true,
+		isMoney: true,
+		f:       123.45,
+	}
+	p := NewCustomNumericParser("", "", "")
+	actual, err := p.parse(in)
+	assert.NoError(t, err)
+	assert.Equal(t, *expected, *actual)
+
+}
+
+func TestUSDNumericParserParse(t *testing.T) {
 	tests := []struct {
 		in  string
 		out *Numeric
