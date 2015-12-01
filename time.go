@@ -29,6 +29,8 @@ var commonTimeLayouts = []string{
 }
 
 var commonDateLayouts = []string{
+	"01-02-06",
+	"02-01-06", // This may not ever match
 	"1/2/2006",
 	"1-2-2006",
 	"01-02-2006",
