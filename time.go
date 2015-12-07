@@ -26,13 +26,13 @@ var commonTimeLayouts = []string{
 	time.StampMilli,
 	time.StampMicro,
 	time.StampNano,
-	"1/2/06 15:04", // xls style
-	"2/1/06 15:04", // xls style
+	"1/2/06 15:04",
+	"2/1/06 15:04",
 }
 
 var commonDateLayouts = []string{
-	"1/2/06", // xls style
-	"2/1/06", // xls style
+	"1/2/06",
+	"2/1/06",
 	"01-02-06",
 	"02-01-06", // This may not ever match
 	"1/2/2006",
