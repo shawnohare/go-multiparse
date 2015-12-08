@@ -12,6 +12,7 @@ var commonTimeLayouts = []string{
 	time.ANSIC,
 	time.UnixDate,
 	time.RubyDate,
+	"2006-01-02T15:04:05+07:00", // ISO 8601 in UTC
 	"2006-01-02T15:04:05Z0700",
 	"2006-01-02 15:04:05Z07:00",
 	"2006-01-02 15:04:05Z0700",
@@ -28,6 +29,7 @@ var commonTimeLayouts = []string{
 	time.StampNano,
 	"1/2/06 15:04",
 	"2/1/06 15:04",
+	"Jan. 2 2006 15:04:05",
 }
 
 var commonDateLayouts = []string{
