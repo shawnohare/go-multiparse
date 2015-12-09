@@ -10,8 +10,8 @@ var context = struct {
 	p: NewParser(),
 }
 
-// MultiParse is the general interface all multiparse parsers implement.
-type MultiParse interface {
+// Interface is the general interface all multiparse parsers implement.
+type Interface interface {
 	Parse(string) (interface{}, error)
 }
 

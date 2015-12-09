@@ -7,13 +7,13 @@ import (
 
 // Parser instances determine whether a string is a numeric or
 // time representation.  Each Parser instance implements
-// the MultiParse interface.  Moreover, it is a wrapper for two more
-// MultiParse interfaces: one for parsing numeric strings and the other
+// the Interface interface.  Moreover, it is a wrapper for two more
+// Interface interfaces: one for parsing numeric strings and the other
 // for parsing datetime strings.
 type Parser struct {
-	numeric MultiParse
-	time    MultiParse
-	b       MultiParse
+	numeric Interface
+	time    Interface
+	b       Interface
 }
 
 // NewGeneralParser constructs a general purpose top-level Parser instance.
@@ -37,10 +37,10 @@ func NewUSDParser() *Parser {
 }
 
 // NewParser is a general purpose parser that uses the passed in
-// MultiParse interfaces to determine whether a string is a numeric or
+// Interface interfaces to determine whether a string is a numeric or
 // time representation.  The provided parsers should return *Numeric and
 // *Time instances, respectively.
-func NewCustomParser(numeric, time, boolean MultiParse) *Parser {
+func NewCustomParser(numeric, time, boolean Interface) *Parser {
 	return &Parser{
 		numeric: numeric,
 		time:    time,
@@ -50,7 +50,7 @@ func NewCustomParser(numeric, time, boolean MultiParse) *Parser {
 
 // Parse a string to determine if it is a numeric or monetary value.
 // This method is defined primarily so that the Parser struct satifies
-// the MultiParse interface.
+// the Interface interface.
 func (p Parser) Parse(s string) (interface{}, error) {
 	return p.parse(s)
 }
