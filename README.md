@@ -1,4 +1,7 @@
 # multiparse
+[![Circle CI](https://circleci.com/gh/shawnohare/go-multiparse.svg?style=svg)](https://circleci.com/gh/shawnohare/go-multiparse)
+[![GoDoc](https://godoc.org/github.com/shawnohare/go-multiparse?status.svg)](http://godoc.org/github.com/shawnohare/go-multiparse)
+
 Basic string parser written in Go.
 
 Currently the parser focuses on determining whether a string can be an 
