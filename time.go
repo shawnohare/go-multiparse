@@ -6,6 +6,23 @@ import (
 	"time"
 )
 
+// TODO
+// - [ ] try to split date from time.
+// - [ ] Sanitize both.
+// - [ ] see if the input parses in multiple classes.  If so, it's ambiguous.
+
+// expression:
+// timeEquivalenceClass is an equivalence class of datetime formats
+// with respect to the relation ~ defined by f ~ g if and only if
+// T(time.Parse(f, f)) = T(time.Parse(g, g)), where T is the time truncation
+// function.
+type timeEquivalenceClass struct {
+	dateRep string
+
+	dates []string
+	times []string
+}
+
 var commonTimeLayouts = []string{
 	time.RFC3339,
 	time.RFC3339Nano,
